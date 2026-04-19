@@ -18,6 +18,16 @@ extension Color {
         self.init(red: r, green: g, blue: b)
     }
 
+    var hexString: String {
+        let ui = UIColor(self)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0
+        ui.getRed(&r, green: &g, blue: &b, alpha: nil)
+        return String(format: "#%02X%02X%02X",
+                      min(255, max(0, Int(r * 255 + 0.5))),
+                      min(255, max(0, Int(g * 255 + 0.5))),
+                      min(255, max(0, Int(b * 255 + 0.5))))
+    }
+
     // Adaptive app background: #f4f4f7 light / #3a3d4a dark
     static let ycBg = Color(uiColor: UIColor { tc in
         tc.userInterfaceStyle == .dark

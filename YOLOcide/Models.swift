@@ -16,6 +16,30 @@ struct WheelOption: Identifiable, Equatable {
 }
 
 extension WheelOption {
+    var asSessionOption: SessionOption {
+        SessionOption(name: name, colorHex: color.hexString)
+    }
+}
+
+// MARK: - Session history models
+
+struct SessionOption: Identifiable, Codable {
+    var id = UUID()
+    var name: String
+    var colorHex: String
+
+    var color: Color { Color(hex: colorHex) }
+}
+
+struct SpinSession: Identifiable, Codable {
+    var id = UUID()
+    var timestamp: Date
+    var winners: [SessionOption]
+    var wheelOptions: [SessionOption]
+    var isRankSession: Bool
+}
+
+extension WheelOption {
     static let defaults: [WheelOption] = [
         WheelOption(name: "Tacos",       color: Color(hex: "#ffd4b8")),
         WheelOption(name: "Sushi",       color: Color(hex: "#bfeed6")),

@@ -6,7 +6,15 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var options: [WheelOption] = WheelOption.defaults
+    @EnvironmentObject private var historyStore: HistoryStore
+
+    @State private var options: [WheelOption] = {
+        guard let data = UserDefaults.standard.data(forKey: "yolocide_options_v1"),
+              let stored = try? JSONDecoder().decode([SessionOption].self, from: data),
+              !stored.isEmpty
+        else { return WheelOption.defaults }
+        return stored.map { WheelOption(name: $0.name, color: Color(hex: $0.colorHex)) }
+    }()
     @State private var rotation: Double = 0
     @State private var isSpinning = false
     @State private var result: WheelOption? = nil
@@ -16,6 +24,9 @@ struct ContentView: View {
     @State private var rankAllMode = false
     @State private var winners: [WheelOption] = []
     @State private var showWinnersSheet = false
+    @State private var showHistory = false
+    @State private var rankSessionBaseOptions: [WheelOption] = []
+    @State private var lastSpinOptions: [WheelOption] = []
 
     @Environment(\.colorScheme) private var scheme
 
@@ -101,6 +112,16 @@ struct ContentView: View {
                 .zIndex(20)
             }
         }
+        .fullScreenCover(isPresented: $showHistory) {
+            HistoryView()
+                .environmentObject(historyStore)
+        }
+        .onChange(of: options) { _, newOptions in
+            let stored = newOptions.map { $0.asSessionOption }
+            if let data = try? JSONEncoder().encode(stored) {
+                UserDefaults.standard.set(data, forKey: "yolocide_options_v1")
+            }
+        }
     }
 
     // MARK: - Header
@@ -114,6 +135,33 @@ struct ContentView: View {
                 .tracking(-1.2)
 
             Spacer()
+
+            // History button
+            Button {
+                showHistory = true
+            } label: {
+                Image(systemName: "clock.arrow.circlepath")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(Color(.label))
+                    .frame(width: 44, height: 44)
+                    .background(
+                        Circle()
+                            .fill(scheme == .dark
+                                ? Color.white.opacity(0.10)
+                                : Color.white.opacity(0.72))
+                            .overlay(
+                                Circle().stroke(
+                                    scheme == .dark
+                                        ? Color.white.opacity(0.12)
+                                        : Color.black.opacity(0.05),
+                                    lineWidth: 1
+                                )
+                            )
+                    )
+                    .shadow(color: Color(hex: "#1e1846").opacity(0.06), radius: 6, y: 2)
+            }
+            .buttonStyle(ScaleButtonStyle())
+            .padding(.trailing, 8)
 
             // Glass "+" button
             Button {
@@ -329,8 +377,10 @@ struct ContentView: View {
         .padding(.horizontal, 20)
         .padding(.top, 12)
         .padding(.bottom, 8)
-        .onChange(of: rankAllMode) { _, _ in
+        .onChange(of: rankAllMode) { _, newValue in
+            if !newValue { savePartialRankSession() }
             winners = []
+            rankSessionBaseOptions = []
         }
     }
 
@@ -340,6 +390,12 @@ struct ContentView: View {
         guard !isSpinning, options.count >= 2 else { return }
         isSpinning = true
         result = nil
+
+        // Snapshot for session recording
+        lastSpinOptions = options
+        if rankAllMode && winners.isEmpty {
+            rankSessionBaseOptions = options
+        }
 
         let n = options.count
         let segAngle = 360.0 / Double(n)
@@ -388,8 +444,17 @@ struct ContentView: View {
                 }
             }
             withAnimation(.easeOut(duration: 0.22)) { result = nil }
-            // Auto-show rankings when all options have been ranked
+            // When all options are ranked: record session and show winners sheet
             if options.count < 2 {
+                let allWinners = winners
+                let baseOptions = rankSessionBaseOptions
+                historyStore.add(SpinSession(
+                    timestamp: Date(),
+                    winners: allWinners.map { $0.asSessionOption },
+                    wheelOptions: baseOptions.map { $0.asSessionOption },
+                    isRankSession: true
+                ))
+                rankSessionBaseOptions = []
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                     withAnimation(.spring(response: 0.42, dampingFraction: 0.7)) {
                         showWinnersSheet = true
@@ -397,6 +462,13 @@ struct ContentView: View {
                 }
             }
         } else {
+            // Record normal (single-winner) session
+            historyStore.add(SpinSession(
+                timestamp: Date(),
+                winners: [winner.asSessionOption],
+                wheelOptions: lastSpinOptions.map { $0.asSessionOption },
+                isRankSession: false
+            ))
             withAnimation(.easeOut(duration: 0.22)) { result = nil }
         }
     }
@@ -404,14 +476,36 @@ struct ContentView: View {
     // MARK: - Clear rank results (returns ranked options back to the wheel)
 
     private func clearRankResults() {
+        // Only save as partial if the ranking wasn't complete (complete sessions are
+        // already saved in dismissResult when the last option is ranked).
+        if !options.isEmpty { savePartialRankSession() }
         result = nil
         options = winners + options
         winners = []
+        rankSessionBaseOptions = []
+    }
+
+    // MARK: - Save partial rank session
+
+    private func savePartialRankSession() {
+        guard !winners.isEmpty, !rankSessionBaseOptions.isEmpty else { return }
+        historyStore.add(SpinSession(
+            timestamp: Date(),
+            winners: winners.map { $0.asSessionOption },
+            wheelOptions: rankSessionBaseOptions.map { $0.asSessionOption },
+            isRankSession: true
+        ))
     }
 
     // MARK: - Add option
 
     private func addOption(name: String) {
+        // Adding an item while mid-ranking finishes the current partial session.
+        if rankAllMode && !winners.isEmpty {
+            savePartialRankSession()
+            winners = []
+            rankSessionBaseOptions = []
+        }
         let nextColor = Color.wheelPastels[options.count % Color.wheelPastels.count]
         withAnimation(.spring(response: 0.34, dampingFraction: 0.8)) {
             options.append(WheelOption(name: name, color: nextColor))
@@ -422,4 +516,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(HistoryStore())
 }
