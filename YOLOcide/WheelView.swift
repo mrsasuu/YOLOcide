@@ -5,56 +5,47 @@
 
 import SwiftUI
 
-// MARK: - Pie slice shape
+// MARK: - Circular segment shape
+//
+// Colored area = region between the outer arc and the polygon chord.
+// When n is large the polygon vertex radius (polyR) shrinks inward so the
+// arc band is always at least minArcFraction × outerRadius tall.
 
 private struct WheelSlice: Shape {
     let startAngle: Angle
     let endAngle: Angle
+    let outerRadius: CGFloat
+    let innerRadius: CGFloat   // polygon vertex radius (≤ outerRadius)
 
     func path(in rect: CGRect) -> Path {
         let center = CGPoint(x: rect.midX, y: rect.midY)
-        let r = min(rect.width, rect.height) / 2
+        let s = startAngle.radians
+        let e = endAngle.radians
         var p = Path()
-        p.move(to: center)
-        p.addArc(center: center, radius: r,
-                 startAngle: startAngle, endAngle: endAngle,
-                 clockwise: false)
+        p.move(to: CGPoint(x: center.x + outerRadius * CGFloat(cos(s)),
+                           y: center.y + outerRadius * CGFloat(sin(s))))
+        p.addArc(center: center, radius: outerRadius,
+                 startAngle: startAngle, endAngle: endAngle, clockwise: false)
+        // Draw inward to the inner (polygon) vertex, then chord back to start
+        p.addLine(to: CGPoint(x: center.x + innerRadius * CGFloat(cos(e)),
+                              y: center.y + innerRadius * CGFloat(sin(e))))
+        p.addLine(to: CGPoint(x: center.x + innerRadius * CGFloat(cos(s)),
+                              y: center.y + innerRadius * CGFloat(sin(s))))
         p.closeSubpath()
         return p
     }
 }
 
-// MARK: - Dividers canvas (extracted so Canvas closure has a simple concrete type)
-
-private struct WheelDividers: View {
-    let count: Int
-    let segAngle: Double
-    let radius: CGFloat
-    let center: CGPoint
-    let color: Color
-
-    var body: some View {
-        Canvas { ctx, _ in
-            for i in 0..<count {
-                let rad = (Double(i) * segAngle - 90) * .pi / 180
-                var line = Path()
-                line.move(to: center)
-                line.addLine(to: CGPoint(
-                    x: center.x + radius * CGFloat(cos(rad)),
-                    y: center.y + radius * CGFloat(sin(rad))
-                ))
-                ctx.stroke(line, with: .color(color), lineWidth: 2)
-            }
-        }
-    }
-}
-
-// MARK: - Rotating disc (slices + dividers + labels)
+// MARK: - Rotating disc (arc segments + labels, no dividers)
 
 private struct WheelDisc: View {
     let options: [WheelOption]
     let size: CGFloat
     @Environment(\.colorScheme) private var scheme
+
+    // Minimum arc-band height as a fraction of the outer radius.
+    // Below this threshold the polygon vertex radius shrinks inward.
+    private static let minArcFraction: Double = 0.25
 
     private var n: Int { options.count }
     private var sa: Double { 360.0 / Double(max(n, 1)) }
@@ -62,10 +53,20 @@ private struct WheelDisc: View {
     private var cx: CGFloat { size / 2 }
     private var cy: CGFloat { size / 2 }
 
+    /// Polygon vertex radius that keeps the arc band ≥ minArcFraction × r.
+    /// Formula: polyR × cos(π/n) ≤ r × (1 − minArcFraction)
+    ///       → polyR ≤ r × (1 − minArcFraction) / cos(π/n)
+    /// Clamped to r so it never exceeds the outer circle.
+    private var polyR: CGFloat {
+        guard n > 1 else { return r }
+        let cosVal = cos(.pi / Double(n))
+        guard cosVal > 0 else { return r }
+        return CGFloat(min(1.0, (1.0 - Self.minArcFraction) / cosVal)) * r
+    }
+
     var body: some View {
         ZStack {
             slicesLayer
-            dividersLayer
             labelsLayer
         }
         .frame(width: size, height: size)
@@ -74,16 +75,17 @@ private struct WheelDisc: View {
     @ViewBuilder
     private var slicesLayer: some View {
         let opacity: Double = scheme == .dark ? 0.70 : 1.0
+        let pR = polyR
         ForEach(options.indices, id: \.self) { i in
             let start = Double(i) * sa - 90
-            WheelSlice(startAngle: .degrees(start), endAngle: .degrees(start + sa))
-                .fill(options[i].color.opacity(opacity))
+            WheelSlice(
+                startAngle: .degrees(start),
+                endAngle: .degrees(start + sa),
+                outerRadius: r,
+                innerRadius: pR
+            )
+            .fill(options[i].color.opacity(opacity))
         }
-    }
-
-    private var dividersLayer: some View {
-        WheelDividers(count: n, segAngle: sa, radius: r - 1, center: CGPoint(x: cx, y: cy),
-                      color: scheme == .dark ? Color.white.opacity(0.55) : .white)
     }
 
     @ViewBuilder
@@ -91,9 +93,14 @@ private struct WheelDisc: View {
         let labelColor: Color = scheme == .dark
             ? Color.white.opacity(0.85)
             : Color(red: 0.11, green: 0.11, blue: 0.11).opacity(0.80)
-        let fontSize: CGFloat = max(9, min(14, size * 0.046))
-        let labelR: CGFloat = r * 0.62
-        let frameW: CGFloat = r * 0.72
+        let pR = polyR
+        // Apothem = perpendicular distance from center to the chord
+        let apothem = n > 1 ? pR * CGFloat(cos(.pi / Double(n))) : pR
+        // Place label at the mid-height of the arc band
+        let labelR: CGFloat = (apothem + r) / 2
+        // Frame width ≈ 85% of chord length
+        let chordLen: CGFloat = n > 1 ? 2 * pR * CGFloat(sin(.pi / Double(n))) : pR
+        let fontSize: CGFloat = max(9, min(13, size * 0.042))
         ForEach(options.indices, id: \.self) { i in
             let midDeg = Double(i) * sa + sa / 2 - 90
             let midRad = midDeg * .pi / 180
@@ -102,9 +109,10 @@ private struct WheelDisc: View {
                 .foregroundStyle(labelColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
-                .frame(width: frameW)
+                .frame(width: chordLen * 0.85)
                 .rotationEffect(.degrees(midDeg + 90))
-                .position(x: cx + labelR * CGFloat(cos(midRad)), y: cy + labelR * CGFloat(sin(midRad)))
+                .position(x: cx + labelR * CGFloat(cos(midRad)),
+                          y: cy + labelR * CGFloat(sin(midRad)))
         }
     }
 }
@@ -175,8 +183,8 @@ struct WheelView: View {
             let cx = geo.size.width / 2
             let cy = geo.size.height / 2
             let ringColor: Color = scheme == .dark
-                ? Color.white.opacity(0.08)
-                : Color(hex: "#3c288c").opacity(0.08)
+                ? Color.white.opacity(0.15)
+                : Color(red: 0.82, green: 0.82, blue: 0.86).opacity(0.90)
             let shadowColor: Color = scheme == .dark
                 ? Color.black.opacity(0.35)
                 : Color(hex: "#3c288c").opacity(0.14)
@@ -195,7 +203,7 @@ struct WheelView: View {
                 }
 
                 Circle()
-                    .stroke(ringColor, lineWidth: 1)
+                    .stroke(ringColor, lineWidth: max(2, size * 0.022))
                     .frame(width: size - 2, height: size - 2)
                     .position(x: cx, y: cy)
 
