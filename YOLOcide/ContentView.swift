@@ -12,10 +12,11 @@ struct ContentView: View {
     @State private var result: WheelOption? = nil
     @State private var listOpen = false
     @State private var showAddSheet = false
+    @State private var openPickerID: UUID? = nil
 
     @Environment(\.colorScheme) private var scheme
 
-    // Wheel shrinks from 270 → 170 when list opens
+    private let baseWheelSize: CGFloat = 270
     private var wheelSize: CGFloat { listOpen ? 170 : 270 }
 
     // MARK: - Body
@@ -137,6 +138,8 @@ struct ContentView: View {
                 isSpinning: isSpinning,
                 onSpin: spin
             )
+            .frame(width: baseWheelSize, height: baseWheelSize)
+            .scaleEffect(wheelSize / baseWheelSize)
             .frame(width: wheelSize, height: wheelSize)
             .padding(.top, 12)
             .animation(.spring(response: 0.42, dampingFraction: 0.7), value: wheelSize)
@@ -188,25 +191,40 @@ struct ContentView: View {
                     ForEach(options) { opt in
                         OptionRowView(
                             option: opt,
+                            openPickerID: $openPickerID,
                             onColorChange: { newColor in
                                 guard let idx = options.firstIndex(of: opt) else { return }
                                 withAnimation(.spring(response: 0.26, dampingFraction: 0.72)) {
                                     options[idx].color = newColor
                                 }
                             },
+                            onNameChange: { newName in
+                                guard let idx = options.firstIndex(of: opt) else { return }
+                                options[idx].name = newName
+                            },
                             onDelete: {
                                 withAnimation(.spring(response: 0.34, dampingFraction: 0.8)) {
                                     options.removeAll { $0.id == opt.id }
                                 }
+                                openPickerID = nil
                                 result = nil
                             }
                         )
+                        .zIndex(openPickerID == opt.id ? 1 : 0)
                     }
                 }
             }
             .padding(.horizontal, 20)
             .padding(.top, 6)
             .padding(.bottom, 24)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                if openPickerID != nil {
+                    withAnimation(.spring(response: 0.26, dampingFraction: 0.72)) {
+                        openPickerID = nil
+                    }
+                }
+            }
         }
     }
 

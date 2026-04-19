@@ -182,9 +182,6 @@ struct WheelView: View {
             let size = min(geo.size.width, geo.size.height)
             let cx = geo.size.width / 2
             let cy = geo.size.height / 2
-            let ringColor: Color = scheme == .dark
-                ? Color.white.opacity(0.15)
-                : Color(red: 0.82, green: 0.82, blue: 0.86).opacity(0.90)
             let shadowColor: Color = scheme == .dark
                 ? Color.black.opacity(0.35)
                 : Color(hex: "#3c288c").opacity(0.14)
@@ -202,12 +199,7 @@ struct WheelView: View {
                         .position(x: cx, y: cy)
                 }
 
-                Circle()
-                    .stroke(ringColor, lineWidth: max(2, size * 0.022))
-                    .frame(width: size - 2, height: size - 2)
-                    .position(x: cx, y: cy)
-
-                WheelCenterCap(size: size * 0.40, isSpinning: isSpinning, onTap: onSpin)
+WheelCenterCap(size: size * 0.40, isSpinning: isSpinning, onTap: onSpin)
                     .position(x: cx, y: cy)
             }
         }

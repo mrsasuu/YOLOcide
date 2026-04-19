@@ -35,7 +35,7 @@ extension Color {
     // Primary purple #6c5ce7
     static let ycPurple = Color(hex: "#6c5ce7")
 
-    // Wheel pastel palette (8 colors, light-mode full opacity; dark mode apply 0.70 opacity)
+    // Wheel pastel palette (20 colors, light-mode full opacity; dark mode apply 0.70 opacity)
     static let wheelPastels: [Color] = [
         Color(hex: "#c8bfff"),  // lavender
         Color(hex: "#bfdcff"),  // sky
@@ -45,6 +45,18 @@ extension Color {
         Color(hex: "#d8b8ff"),  // violet
         Color(hex: "#ffe8a8"),  // butter
         Color(hex: "#b8ecec"),  // aqua
+        Color(hex: "#ffb3b3"),  // salmon
+        Color(hex: "#ffd6a5"),  // tangerine
+        Color(hex: "#fdffb6"),  // lemon
+        Color(hex: "#caffbf"),  // lime
+        Color(hex: "#9bf6ff"),  // cyan
+        Color(hex: "#a0c4ff"),  // cornflower
+        Color(hex: "#bdb2ff"),  // periwinkle
+        Color(hex: "#ffc6ff"),  // pink
+        Color(hex: "#e8d5b7"),  // sand
+        Color(hex: "#d4e8d7"),  // sage
+        Color(hex: "#f0d9ff"),  // lilac
+        Color(hex: "#ffe5d9"),  // blush
     ]
 }
 
