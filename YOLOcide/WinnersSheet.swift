@@ -1,23 +1,5 @@
 import SwiftUI
 
-private struct SheetShape: Shape {
-    let radius: CGFloat
-    func path(in rect: CGRect) -> Path {
-        let r = radius
-        var p = Path()
-        p.move(to: CGPoint(x: 0, y: rect.height + r))
-        p.addLine(to: CGPoint(x: 0, y: r))
-        p.addArc(center: CGPoint(x: r, y: r), radius: r,
-                 startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false)
-        p.addLine(to: CGPoint(x: rect.width - r, y: 0))
-        p.addArc(center: CGPoint(x: rect.width - r, y: r), radius: r,
-                 startAngle: .degrees(270), endAngle: .degrees(0), clockwise: false)
-        p.addLine(to: CGPoint(x: rect.width, y: rect.height + r))
-        p.closeSubpath()
-        return p
-    }
-}
-
 struct WinnersSheet: View {
     let winners: [WheelOption]
     let onClose: () -> Void
@@ -27,25 +9,8 @@ struct WinnersSheet: View {
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // Backdrop
-            Color.black.opacity(0.35)
-                .background(.ultraThinMaterial)
-                .ignoresSafeArea()
-                .onTapGesture(perform: onClose)
-
-            // Sheet card
+        ActionSheetContainer(onClose: onClose) {
             VStack(alignment: .leading, spacing: 0) {
-                // Drag handle
-                Capsule()
-                    .fill(scheme == .dark
-                        ? Color.white.opacity(0.20)
-                        : Color.black.opacity(0.15))
-                    .frame(width: 36, height: 5)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 14)
-                    .padding(.bottom, 20)
-
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(settings.t("winners.title"))
@@ -74,6 +39,7 @@ struct WinnersSheet: View {
                     .buttonStyle(ScaleButtonStyle())
                 }
                 .padding(.bottom, 20)
+                .padding(.top, 20)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 10) {
@@ -86,19 +52,13 @@ struct WinnersSheet: View {
                 .frame(maxHeight: 360)
 
                 PrimaryButton(label: settings.t("winners.done"), disabled: false, action: onClose)
+                    .padding(.horizontal, 20)
                     .padding(.top, 16)
                     .padding(.bottom, 34)
             }
             .padding(.horizontal, 20)
-            .background(
-                SheetShape(radius: 28)
-                    .fill(scheme == .dark ? Color(hex: "#454856") : Color.white)
-                    .ignoresSafeArea(edges: .bottom)
-            )
             .shadow(color: Color(hex: "#3c288c").opacity(0.20), radius: 30, y: -10)
         }
-        .ignoresSafeArea()
-        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 }
 
