@@ -7,6 +7,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject private var historyStore: HistoryStore
+    @EnvironmentObject private var settings: SettingsStore
 
     @State private var options: [WheelOption] = {
         guard let data = UserDefaults.standard.data(forKey: "yolocide_options_v1"),
@@ -25,6 +26,7 @@ struct ContentView: View {
     @State private var winners: [WheelOption] = []
     @State private var showWinnersSheet = false
     @State private var showHistory = false
+    @State private var showHelp = false
     @State private var rankSessionBaseOptions: [WheelOption] = []
     @State private var lastSpinOptions: [WheelOption] = []
 
@@ -74,7 +76,9 @@ struct ContentView: View {
                 ResultOverlay(
                     result: winner,
                     rankPosition: rankAllMode ? winners.count + 1 : nil,
-                    buttonLabel: rankAllMode ? (options.count <= 2 ? "See rankings" : "Next round") : "Sounds good"
+                    buttonLabel: rankAllMode
+                        ? (options.count <= 2 ? settings.t("result.seerankings") : settings.t("result.next"))
+                        : settings.t("result.dismiss")
                 ) {
                     dismissResult()
                 }
@@ -115,6 +119,11 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showHistory) {
             HistoryView()
                 .environmentObject(historyStore)
+                .environmentObject(settings)
+        }
+        .fullScreenCover(isPresented: $showHelp) {
+            HelpView()
+                .environmentObject(settings)
         }
         .onChange(of: options) { _, newOptions in
             let stored = newOptions.map { $0.asSessionOption }
@@ -137,28 +146,15 @@ struct ContentView: View {
             Spacer()
 
             // History button
-            Button {
-                showHistory = true
-            } label: {
-                Image(systemName: "clock.arrow.circlepath")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(Color(.label))
-                    .frame(width: 44, height: 44)
-                    .background(
-                        Circle()
-                            .fill(scheme == .dark
-                                ? Color.white.opacity(0.10)
-                                : Color.white.opacity(0.72))
-                            .overlay(
-                                Circle().stroke(
-                                    scheme == .dark
-                                        ? Color.white.opacity(0.12)
-                                        : Color.black.opacity(0.05),
-                                    lineWidth: 1
-                                )
-                            )
-                    )
-                    .shadow(color: Color(hex: "#1e1846").opacity(0.06), radius: 6, y: 2)
+            Button { showHistory = true } label: {
+                headerIcon("clock.arrow.circlepath", size: 18)
+            }
+            .buttonStyle(ScaleButtonStyle())
+            .padding(.trailing, 6)
+
+            // Help button
+            Button { showHelp = true } label: {
+                headerIcon("questionmark", size: 17)
             }
             .buttonStyle(ScaleButtonStyle())
             .padding(.trailing, 8)
@@ -169,31 +165,32 @@ struct ContentView: View {
                     showAddSheet = true
                 }
             } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundStyle(Color(.label))
-                    .frame(width: 44, height: 44)
-                    .background(
-                        Circle()
-                            .fill(scheme == .dark
-                                ? Color.white.opacity(0.10)
-                                : Color.white.opacity(0.72))
-                            .overlay(
-                                Circle().stroke(
-                                    scheme == .dark
-                                        ? Color.white.opacity(0.12)
-                                        : Color.black.opacity(0.05),
-                                    lineWidth: 1
-                                )
-                            )
-                    )
-                    .shadow(color: Color(hex: "#1e1846").opacity(0.06), radius: 6, y: 2)
+                headerIcon("plus", size: 20)
             }
             .buttonStyle(ScaleButtonStyle())
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
         .padding(.bottom, 6)
+    }
+
+    private func headerIcon(_ name: String, size: CGFloat) -> some View {
+        Image(systemName: name)
+            .font(.system(size: size, weight: .medium))
+            .foregroundStyle(Color(.label))
+            .frame(width: 44, height: 44)
+            .background(
+                Circle()
+                    .fill(scheme == .dark
+                        ? Color.white.opacity(0.10)
+                        : Color.white.opacity(0.72))
+                    .overlay(Circle().stroke(
+                        scheme == .dark
+                            ? Color.white.opacity(0.12)
+                            : Color.black.opacity(0.05),
+                        lineWidth: 1))
+            )
+            .shadow(color: Color(hex: "#1e1846").opacity(0.06), radius: 6, y: 2)
     }
 
     // MARK: - Wheel stage (pointer + wheel)
@@ -228,7 +225,7 @@ struct ContentView: View {
             }
         } label: {
             HStack(spacing: 6) {
-                Text(listOpen ? "Hide options" : "Show options")
+                Text(settings.t(listOpen ? "options.hide" : "options.show"))
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(Color(.secondaryLabel))
 
@@ -250,7 +247,7 @@ struct ContentView: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 10) {
                 if options.isEmpty {
-                    Text("Nothing to decide yet. Add an option.")
+                    Text(settings.t("options.empty"))
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(Color(.tertiaryLabel))
                         .multilineTextAlignment(.center)
@@ -312,7 +309,7 @@ struct ContentView: View {
                         HStack(spacing: 6) {
                             Image(systemName: "list.number")
                                 .font(.system(size: 12, weight: .bold))
-                            Text("\(winners.count) ranked — view")
+                            Text(String(format: settings.t("rank.view"), winners.count))
                                 .font(.system(size: 14, weight: .semibold))
                         }
                         .foregroundStyle(Color.ycPurple)
@@ -330,7 +327,7 @@ struct ContentView: View {
                             clearRankResults()
                         }
                     } label: {
-                        Text("Clear")
+                        Text(settings.t("rank.clear"))
                             .font(.system(size: 14, weight: .medium))
                             .foregroundStyle(Color(.secondaryLabel))
                             .padding(.horizontal, 14)
@@ -346,7 +343,7 @@ struct ContentView: View {
             }
 
             PrimaryButton(
-                label: isSpinning ? "Spinning…" : "Spin my fate",
+                label: settings.t(isSpinning ? "spin.inprogress" : "spin.cta"),
                 disabled: options.count < 2 || isSpinning
             ) {
                 spin()
@@ -366,7 +363,7 @@ struct ContentView: View {
             Image(systemName: "list.number")
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(Color.ycPurple)
-            Text("Rank 'em all")
+            Text(settings.t("rank.toggle"))
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(Color(.label))
             Spacer()
@@ -517,4 +514,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(HistoryStore())
+        .environmentObject(SettingsStore())
 }

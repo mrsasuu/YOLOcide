@@ -28,6 +28,7 @@ struct WinnersSheet: View {
     let onClose: () -> Void
     let onClear: () -> Void
 
+    @EnvironmentObject private var settings: SettingsStore
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
@@ -52,11 +53,11 @@ struct WinnersSheet: View {
 
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Rankings")
+                        Text(settings.t("winners.title"))
                             .font(.system(size: 22, weight: .black))
                             .tracking(-0.6)
                             .foregroundStyle(Color(.label))
-                        Text("In the order fate decided.")
+                        Text(settings.t("winners.subtitle"))
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(Color(.tertiaryLabel))
                     }
@@ -65,7 +66,7 @@ struct WinnersSheet: View {
                         onClear()
                         onClose()
                     } label: {
-                        Text("Start over")
+                        Text(settings.t("winners.startover"))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(Color(.secondaryLabel))
                             .padding(.horizontal, 12)
@@ -89,7 +90,7 @@ struct WinnersSheet: View {
                 }
                 .frame(maxHeight: 360)
 
-                PrimaryButton(label: "Done", disabled: false, action: onClose)
+                PrimaryButton(label: settings.t("winners.done"), disabled: false, action: onClose)
                     .padding(.top, 16)
                     .padding(.bottom, 34)
             }

@@ -27,6 +27,7 @@ struct AddOptionSheet: View {
     let onAdd: (String) -> Void
     let onClose: () -> Void
 
+    @EnvironmentObject private var settings: SettingsStore
     @State private var text = ""
     @FocusState private var focused: Bool
     @Environment(\.colorScheme) private var scheme
@@ -53,14 +54,14 @@ struct AddOptionSheet: View {
                     .padding(.top, 14)
                     .padding(.bottom, 16)
 
-                Text("Add an option")
+                Text(settings.t("add.title"))
                     .font(.system(size: 22, weight: .bold))
                     .tracking(-0.44)
                     .foregroundStyle(Color(.label))
                     .padding(.bottom, 14)
 
                 // Input field
-                TextField("e.g. Pizza", text: $text)
+                TextField(settings.t("add.placeholder"), text: $text)
                     .font(.system(size: 17, weight: .medium))
                     .foregroundStyle(Color(.label))
                     .tint(Color.ycPurple)
@@ -86,7 +87,7 @@ struct AddOptionSheet: View {
                     .submitLabel(.done)
                     .padding(.bottom, 14)
 
-                PrimaryButton(label: "Add to wheel", disabled: trimmed.isEmpty, action: submit)
+                PrimaryButton(label: settings.t("add.button"), disabled: trimmed.isEmpty, action: submit)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 34)

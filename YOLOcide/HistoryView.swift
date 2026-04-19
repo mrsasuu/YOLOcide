@@ -7,6 +7,7 @@ import SwiftUI
 
 struct HistoryView: View {
     @EnvironmentObject private var historyStore: HistoryStore
+    @EnvironmentObject private var settings: SettingsStore
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var scheme
 
@@ -26,8 +27,14 @@ struct HistoryView: View {
                 }
             }
         }
-        .confirmationDialog("Clear all history?", isPresented: $showClearConfirm, titleVisibility: .visible) {
-            Button("Clear all", role: .destructive) { historyStore.clearAll() }
+        .confirmationDialog(
+            settings.t("history.clearall.confirm"),
+            isPresented: $showClearConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(settings.t("history.clearall"), role: .destructive) {
+                historyStore.clearAll()
+            }
         }
     }
 
@@ -57,7 +64,7 @@ struct HistoryView: View {
 
             Spacer()
 
-            Text("History")
+            Text(settings.t("history.title"))
                 .font(.system(size: 17, weight: .bold))
                 .foregroundStyle(Color(.label))
 
@@ -115,10 +122,10 @@ struct HistoryView: View {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.system(size: 44, weight: .light))
                 .foregroundStyle(Color(.tertiaryLabel))
-            Text("No sessions yet")
+            Text(settings.t("history.empty.title"))
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(Color(.secondaryLabel))
-            Text("Spin the wheel to start building your history.")
+            Text(settings.t("history.empty.subtitle"))
                 .font(.system(size: 14))
                 .foregroundStyle(Color(.tertiaryLabel))
                 .multilineTextAlignment(.center)
@@ -134,6 +141,7 @@ private struct SessionCard: View {
     let session: SpinSession
 
     @State private var expanded = false
+    @EnvironmentObject private var settings: SettingsStore
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
@@ -170,12 +178,12 @@ private struct SessionCard: View {
 
     private var timestampRow: some View {
         HStack(alignment: .center, spacing: 8) {
-            Text(formatDate(session.timestamp))
+            Text(formatDate(session.timestamp, settings: settings))
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(Color(.secondaryLabel))
             Spacer()
             if session.isRankSession {
-                Label("Ranked", systemImage: "list.number")
+                Label(settings.t("history.ranked.badge"), systemImage: "list.number")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(Color.ycPurple)
                     .padding(.horizontal, 8)
@@ -225,7 +233,7 @@ private struct SessionCard: View {
                 }
             }
             if session.winners.count > 3 {
-                Text("+\(session.winners.count - 3) more")
+                Text(String(format: settings.t("history.more"), session.winners.count - 3))
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(Color(.tertiaryLabel))
                     .padding(.leading, 36)
@@ -237,14 +245,13 @@ private struct SessionCard: View {
 
     private var wheelSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Tap target: dots row + chevron
             Button {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
                     expanded.toggle()
                 }
             } label: {
                 HStack(spacing: 8) {
-                    Text("Wheel")
+                    Text(settings.t("history.wheel.label"))
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(Color(.tertiaryLabel))
 
@@ -269,7 +276,7 @@ private struct SessionCard: View {
 
                     Spacer()
 
-                    Text("\(session.wheelOptions.count) options")
+                    Text(String(format: settings.t("history.options.count"), session.wheelOptions.count))
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(Color(.tertiaryLabel))
 
@@ -281,7 +288,6 @@ private struct SessionCard: View {
             }
             .buttonStyle(.plain)
 
-            // Expanded options list
             if expanded {
                 VStack(alignment: .leading, spacing: 0) {
                     Rectangle()
@@ -312,16 +318,19 @@ private struct SessionCard: View {
     }
 }
 
-// MARK: - Date formatting
+// MARK: - Locale-aware date formatting
 
-private func formatDate(_ date: Date) -> String {
+private func formatDate(_ date: Date, settings: SettingsStore) -> String {
     let cal = Calendar.current
+    let locale = Locale(identifier: settings.language.rawValue)
     let tf = DateFormatter()
     tf.dateFormat = "h:mm a"
+    tf.locale = locale
     let time = tf.string(from: date)
-    if cal.isDateInToday(date)     { return "Today · \(time)" }
-    if cal.isDateInYesterday(date) { return "Yesterday · \(time)" }
+    if cal.isDateInToday(date)     { return String(format: settings.t("history.date.today"), time) }
+    if cal.isDateInYesterday(date) { return String(format: settings.t("history.date.yesterday"), time) }
     let df = DateFormatter()
     df.dateFormat = "MMM d · h:mm a"
+    df.locale = locale
     return df.string(from: date)
 }

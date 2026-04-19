@@ -11,10 +11,12 @@ struct ResultOverlay: View {
     let buttonLabel: String
     let onDismiss: () -> Void
 
+    @EnvironmentObject private var settings: SettingsStore
     @Environment(\.colorScheme) private var scheme
 
     private var headerText: String {
-        rankPosition.map { "Pick #\($0)" } ?? "Fate has spoken"
+        rankPosition.map { String(format: settings.t("result.rank.header"), $0) }
+            ?? settings.t("result.header")
     }
 
     var body: some View {
