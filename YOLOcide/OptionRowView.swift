@@ -33,7 +33,6 @@ struct OptionRowView: View {
         }
         .onAppear { customColor = option.color }
         .onChange(of: option.color) { customColor = $0 }
-        .onChange(of: customColor) { onColorChange($0) }
     }
 
     // MARK: - Row pill
@@ -135,7 +134,10 @@ struct OptionRowView: View {
             Divider()
 
             HStack(spacing: 8) {
-                ColorPicker("Custom", selection: $customColor, supportsOpacity: false)
+                ColorPicker("Custom", selection: Binding(
+                    get: { customColor },
+                    set: { customColor = $0; onColorChange($0) }
+                ), supportsOpacity: false)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(Color(.label))
 

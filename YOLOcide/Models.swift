@@ -11,7 +11,7 @@ struct WheelOption: Identifiable, Equatable {
     var color: Color
 
     static func == (lhs: WheelOption, rhs: WheelOption) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id && lhs.name == rhs.name && lhs.color == rhs.color
     }
 }
 
