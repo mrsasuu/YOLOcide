@@ -25,6 +25,11 @@ struct ContentView: View {
     @State private var showHelp = false
     @State private var rankSessionBaseOptions: [WheelOption] = []
     @State private var lastSpinOptions: [WheelOption] = []
+    @State private var lastSegmentIndex: Int = -1
+    @State private var segmentCheckTimer: Timer? = nil
+    @State private var spinStartTime: Date? = nil
+    @State private var spinStartRotation: Double = 0
+    @State private var spinEndRotation: Double = 0
 
     @Environment(\.colorScheme) private var scheme
 
@@ -126,6 +131,9 @@ struct ContentView: View {
             if let data = try? JSONEncoder().encode(stored) {
                 UserDefaults.standard.set(data, forKey: "yolocide_options_v1")
             }
+        }
+        .onDisappear {
+            stopSegmentMonitoring()
         }
     }
 
@@ -407,12 +415,20 @@ struct ContentView: View {
         // 6 full rotations + delta → lands exactly on winner
         let newRotation = rotation + 6 * 360.0 + delta
 
+        // Store end rotation for animation tracking
+        spinEndRotation = newRotation
+
+        // Start monitoring segment changes for haptic feedback
+        startSegmentMonitoring()
+
         // cubic-bezier(0.16, 1, 0.3, 1) ≈ SwiftUI timingCurve
         withAnimation(.timingCurve(0.16, 1, 0.3, 1, duration: 3.6)) {
             rotation = newRotation
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.7) {
+            // Stop monitoring segment changes
+            stopSegmentMonitoring()
             isSpinning = false
             withAnimation(.spring(response: 0.42, dampingFraction: 0.6)) {
                 result = options[winnerIdx]
@@ -504,6 +520,88 @@ struct ContentView: View {
             options.append(WheelOption(name: name, color: nextColor))
         }
         result = nil
+    }
+
+    // MARK: - Haptic feedback for segment changes
+
+    /// Calculates which segment is currently under the fixed indicator (at the top).
+    /// The indicator points to wheel angle: (360 - rotation % 360) % 360
+    /// Returns the segment index (0 to n-1) or -1 if no options.
+    private func getCurrentSegmentIndex(for rotation: Double) -> Int {
+        guard options.count > 0 else { return -1 }
+        let n = Double(options.count)
+        let segAngle = 360.0 / n
+        
+        // The indicator at the top points to this angle in wheel space
+        let indicatorAngle = (360.0 - rotation.truncatingRemainder(dividingBy: 360.0))
+            .truncatingRemainder(dividingBy: 360.0)
+        
+        // Which segment is the indicator pointing to?
+        let segmentIdx = Int(indicatorAngle / segAngle) % Int(n)
+        return segmentIdx
+    }
+
+    /// Applies cubic-bezier timing curve (0.16, 1, 0.3, 1)
+    private func cubicBezier(t: Double) -> Double {
+        let p0 = 0.0, p1 = 0.16, p2 = 0.3, p3 = 1.0
+        let mt = 1.0 - t
+        let mt2 = mt * mt
+        let t2 = t * t
+        let mt3 = mt2 * mt
+        let t3 = t2 * t
+        
+        let y = mt3 * p0 + 3 * mt2 * t * p1 + 3 * mt * t2 * p2 + t3 * p3
+        return y
+    }
+
+    /// Calculates current rotation based on elapsed time during spin animation
+    private func calculateAnimatedRotation() -> Double {
+        guard let startTime = spinStartTime else { return rotation }
+        
+        let elapsed = Date().timeIntervalSince(startTime)
+        let duration = 3.6
+        
+        if elapsed >= duration {
+            return spinEndRotation
+        }
+        
+        let progress = elapsed / duration
+        let easedProgress = cubicBezier(t: progress)
+        let delta = spinEndRotation - spinStartRotation
+        return spinStartRotation + delta * easedProgress
+    }
+
+    /// Triggers haptic feedback if haptics are enabled
+    private func triggerHapticFeedback() {
+        guard settings.hapticsEnabled else { return }
+        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+        impactFeedback.impactOccurred()
+    }
+
+    /// Starts monitoring segment changes during wheel spin
+    private func startSegmentMonitoring() {
+        spinStartTime = Date()
+        spinStartRotation = rotation
+        lastSegmentIndex = getCurrentSegmentIndex(for: spinStartRotation)
+        
+        // Check every ~16ms (60 times per second, synced to screen refresh)
+        segmentCheckTimer = Timer.scheduledTimer(withTimeInterval: 0.016, repeats: true) { _ in
+            let animatedRotation = calculateAnimatedRotation()
+            let currentSegment = getCurrentSegmentIndex(for: animatedRotation)
+            
+            if currentSegment != lastSegmentIndex && currentSegment >= 0 {
+                triggerHapticFeedback()
+                lastSegmentIndex = currentSegment
+            }
+        }
+    }
+
+    /// Stops monitoring segment changes
+    private func stopSegmentMonitoring() {
+        segmentCheckTimer?.invalidate()
+        segmentCheckTimer = nil
+        spinStartTime = nil
+        lastSegmentIndex = -1
     }
 }
 
