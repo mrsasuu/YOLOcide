@@ -1,8 +1,3 @@
-//
-//  WheelView.swift
-//  YOLOcide
-//
-
 import SwiftUI
 
 // MARK: - Circular segment shape

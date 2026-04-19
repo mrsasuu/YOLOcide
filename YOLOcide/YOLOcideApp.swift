@@ -1,10 +1,3 @@
-//
-//  YOLOcideApp.swift
-//  YOLOcide
-//
-//  Created by Antonio Javier Benítez Guijarro on 18/04/2026.
-//
-
 import SwiftUI
 
 @main
@@ -17,7 +10,7 @@ struct YOLOcideApp: App {
             ContentView()
                 .environmentObject(historyStore)
                 .environmentObject(settings)
-                .preferredColorScheme(settings.darkMode ? .dark : nil)
+                .preferredColorScheme(settings.appearance.colorScheme)
         }
     }
 }

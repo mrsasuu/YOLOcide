@@ -1,8 +1,3 @@
-//
-//  HelpView.swift
-//  YOLOcide
-//
-
 import SwiftUI
 
 struct HelpView: View {
@@ -136,9 +131,23 @@ struct HelpView: View {
                 .frame(height: 0.5)
                 .padding(.vertical, 16)
 
-            // Dark mode row
-            Toggle(isOn: $settings.darkMode) {
-                Text(settings.t("help.settings.darkmode"))
+            // Appearance row
+            HStack {
+                Text(settings.t("help.settings.appearance"))
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color(.label))
+                Spacer()
+                appearancePicker
+            }
+
+            Rectangle()
+                .fill(Color(.separator).opacity(0.6))
+                .frame(height: 0.5)
+                .padding(.vertical, 16)
+
+            // Haptics row
+            Toggle(isOn: $settings.hapticsEnabled) {
+                Text(settings.t("help.settings.haptics"))
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(Color(.label))
             }
@@ -173,6 +182,40 @@ struct HelpView: View {
                 }
                 .buttonStyle(ScaleButtonStyle())
                 .animation(.spring(response: 0.26, dampingFraction: 0.72), value: settings.language)
+            }
+        }
+        .padding(3)
+        .background(
+            Capsule().fill(scheme == .dark
+                ? Color.white.opacity(0.10)
+                : Color.black.opacity(0.07))
+        )
+    }
+
+    // MARK: - Appearance picker
+
+    private var appearancePicker: some View {
+        HStack(spacing: 2) {
+            ForEach(AppAppearance.allCases, id: \.self) { mode in
+                Button {
+                    withAnimation(.spring(response: 0.26, dampingFraction: 0.72)) {
+                        settings.appearance = mode
+                    }
+                } label: {
+                    Text(settings.t(mode.labelKey))
+                        .font(.system(size: 13,
+                                      weight: settings.appearance == mode ? .semibold : .regular))
+                        .foregroundStyle(settings.appearance == mode ? .white : Color(.secondaryLabel))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(
+                            Capsule().fill(settings.appearance == mode
+                                ? Color.ycPurple
+                                : Color.clear)
+                        )
+                }
+                .buttonStyle(ScaleButtonStyle())
+                .animation(.spring(response: 0.26, dampingFraction: 0.72), value: settings.appearance)
             }
         }
         .padding(3)

@@ -1,8 +1,3 @@
-//
-//  OptionRowView.swift
-//  YOLOcide
-//
-
 import SwiftUI
 
 struct OptionRowView: View {

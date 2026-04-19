@@ -1,9 +1,5 @@
-//
-//  ContentView.swift
-//  YOLOcide
-//
-
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
     @EnvironmentObject private var historyStore: HistoryStore

@@ -1,8 +1,3 @@
-//
-//  AddOptionSheet.swift
-//  YOLOcide
-//
-
 import SwiftUI
 
 private struct SheetShape: Shape {

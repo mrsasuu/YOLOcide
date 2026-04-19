@@ -1,10 +1,3 @@
-//
-//  YOLOcideUITests.swift
-//  YOLOcideUITests
-//
-//  Created by Antonio Javier Benítez Guijarro on 18/04/2026.
-//
-
 import XCTest
 
 final class YOLOcideUITests: XCTestCase {

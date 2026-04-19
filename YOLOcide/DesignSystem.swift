@@ -1,8 +1,3 @@
-//
-//  DesignSystem.swift
-//  YOLOcide
-//
-
 import SwiftUI
 
 // MARK: - Color tokens

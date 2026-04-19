@@ -1,8 +1,3 @@
-//
-//  Models.swift
-//  YOLOcide
-//
-
 import SwiftUI
 
 struct WheelOption: Identifiable, Equatable {

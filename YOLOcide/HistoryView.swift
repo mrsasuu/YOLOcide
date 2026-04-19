@@ -1,8 +1,3 @@
-//
-//  HistoryView.swift
-//  YOLOcide
-//
-
 import SwiftUI
 
 struct HistoryView: View {

@@ -1,8 +1,3 @@
-//
-//  HistoryStore.swift
-//  YOLOcide
-//
-
 import SwiftUI
 
 final class HistoryStore: ObservableObject {

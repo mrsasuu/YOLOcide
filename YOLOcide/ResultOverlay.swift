@@ -1,8 +1,3 @@
-//
-//  ResultOverlay.swift
-//  YOLOcide
-//
-
 import SwiftUI
 
 struct ResultOverlay: View {

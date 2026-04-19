@@ -1,8 +1,3 @@
-//
-//  SettingsStore.swift
-//  YOLOcide
-//
-
 import SwiftUI
 
 enum AppLanguage: String, CaseIterable {
@@ -17,18 +12,46 @@ enum AppLanguage: String, CaseIterable {
     }
 }
 
+enum AppAppearance: String, CaseIterable {
+    case system, light, dark
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light:  return .light
+        case .dark:   return .dark
+        }
+    }
+
+    var labelKey: String {
+        switch self {
+        case .system: return "help.settings.appearance.system"
+        case .light:  return "help.settings.appearance.light"
+        case .dark:   return "help.settings.appearance.dark"
+        }
+    }
+}
+
 final class SettingsStore: ObservableObject {
     @Published var language: AppLanguage {
         didSet { UserDefaults.standard.set(language.rawValue, forKey: "yolocide_language") }
     }
-    @Published var darkMode: Bool {
-        didSet { UserDefaults.standard.set(darkMode, forKey: "yolocide_darkmode") }
+    @Published var appearance: AppAppearance {
+        didSet { UserDefaults.standard.set(appearance.rawValue, forKey: "yolocide_appearance") }
+    }
+    @Published var hapticsEnabled: Bool {
+        didSet { UserDefaults.standard.set(hapticsEnabled, forKey: "yolocide_haptics") }
     }
 
     init() {
         let code = UserDefaults.standard.string(forKey: "yolocide_language") ?? "en"
         language = AppLanguage(rawValue: code) ?? .english
-        darkMode = UserDefaults.standard.bool(forKey: "yolocide_darkmode")
+
+        let appearanceRaw = UserDefaults.standard.string(forKey: "yolocide_appearance") ?? "system"
+        appearance = AppAppearance(rawValue: appearanceRaw) ?? .system
+
+        let hapticsSaved = UserDefaults.standard.object(forKey: "yolocide_haptics")
+        hapticsEnabled = hapticsSaved == nil ? true : UserDefaults.standard.bool(forKey: "yolocide_haptics")
     }
 
     func t(_ key: String) -> String {
@@ -78,8 +101,12 @@ final class SettingsStore: ObservableObject {
         "help.howto.body":          "Add your options with the + button, then spin the wheel. The app randomly picks a winner from all the segments. Tap the center of the wheel or the \"Spin my fate\" button to spin.",
         "help.rankmode.body":       "Enable \"Rank 'em all\" to rank every option. Each spin picks a winner and removes it from the wheel. Keep going until all options are ranked — the final order is saved to history.",
         "help.options.body":        "Tap \"Show options\" to manage your wheel. Use the pencil icon to rename, the color circle to change colors, and the trash icon in the color picker to delete an option.",
-        "help.settings.language":   "Language",
-        "help.settings.darkmode":   "Dark mode",
+        "help.settings.language":          "Language",
+        "help.settings.appearance":        "Appearance",
+        "help.settings.appearance.system": "System",
+        "help.settings.appearance.light":  "Light",
+        "help.settings.appearance.dark":   "Dark",
+        "help.settings.haptics":           "Haptic feedback",
     ]
 
     // MARK: - Spanish
@@ -124,7 +151,11 @@ final class SettingsStore: ObservableObject {
         "help.howto.body":          "Añade tus opciones con el botón +, luego gira la ruleta. La app elige un ganador al azar entre todos los segmentos. Toca el centro de la ruleta o el botón \"¡Que decida el azar!\" para girar.",
         "help.rankmode.body":       "Activa \"Rankear todo\" para ordenar todas las opciones. Cada giro elige un ganador y lo elimina de la ruleta. Sigue girando hasta que todas estén rankeadas — el orden final se guarda en el historial.",
         "help.options.body":        "Toca \"Ver opciones\" para gestionar tu ruleta. Usa el icono del lápiz para renombrar, el círculo de color para cambiar colores, y el icono de papelera en el selector para eliminar.",
-        "help.settings.language":   "Idioma",
-        "help.settings.darkmode":   "Modo oscuro",
+        "help.settings.language":          "Idioma",
+        "help.settings.appearance":        "Apariencia",
+        "help.settings.appearance.system": "Sistema",
+        "help.settings.appearance.light":  "Claro",
+        "help.settings.appearance.dark":   "Oscuro",
+        "help.settings.haptics":           "Vibración táctil",
     ]
 }
