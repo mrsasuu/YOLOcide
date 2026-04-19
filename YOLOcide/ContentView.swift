@@ -13,6 +13,9 @@ struct ContentView: View {
     @State private var listOpen = false
     @State private var showAddSheet = false
     @State private var openPickerID: UUID? = nil
+    @State private var rankAllMode = false
+    @State private var winners: [WheelOption] = []
+    @State private var showWinnersSheet = false
 
     @Environment(\.colorScheme) private var scheme
 
@@ -47,21 +50,38 @@ struct ContentView: View {
                 }
             }
             .animation(.spring(response: 0.42, dampingFraction: 0.7), value: listOpen)
-            // "Spin my fate" CTA docked at the bottom
+            // Bottom panel: rank toggle + optional "view rankings" + CTA
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 if !listOpen {
-                    spinCtaButton
+                    bottomPanel
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
 
             // ── Overlays ──
             if let winner = result {
-                ResultOverlay(result: winner) {
-                    withAnimation(.easeOut(duration: 0.22)) { result = nil }
+                ResultOverlay(
+                    result: winner,
+                    rankPosition: rankAllMode ? winners.count + 1 : nil,
+                    buttonLabel: rankAllMode ? (options.count <= 2 ? "See rankings" : "Next round") : "Sounds good"
+                ) {
+                    dismissResult()
                 }
                 .zIndex(10)
                 .transition(.opacity)
+            }
+
+            if showWinnersSheet {
+                WinnersSheet(
+                    winners: winners,
+                    onClose: {
+                        withAnimation(.spring(response: 0.34, dampingFraction: 0.8)) {
+                            showWinnersSheet = false
+                        }
+                    },
+                    onClear: clearRankResults
+                )
+                .zIndex(15)
             }
 
             if showAddSheet {
@@ -228,23 +248,90 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Spin my fate CTA
+    // MARK: - Bottom panel (rank toggle + CTA)
 
-    private var spinCtaButton: some View {
-        PrimaryButton(
-            label: isSpinning ? "Spinning…" : "Spin my fate",
-            disabled: options.count < 2 || isSpinning
-        ) {
-            spin()
+    private var bottomPanel: some View {
+        VStack(spacing: 0) {
+            rankAllToggle
+
+            if rankAllMode && !winners.isEmpty {
+                HStack(spacing: 10) {
+                    Button {
+                        withAnimation(.spring(response: 0.42, dampingFraction: 0.7)) {
+                            showWinnersSheet = true
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "list.number")
+                                .font(.system(size: 12, weight: .bold))
+                            Text("\(winners.count) ranked — view")
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                        .foregroundStyle(Color.ycPurple)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 9)
+                        .background(
+                            Capsule()
+                                .fill(Color.ycPurple.opacity(0.12))
+                        )
+                    }
+                    .buttonStyle(ScaleButtonStyle())
+
+                    Button {
+                        withAnimation(.spring(response: 0.34, dampingFraction: 0.8)) {
+                            clearRankResults()
+                        }
+                    } label: {
+                        Text("Clear")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(Color(.secondaryLabel))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 9)
+                            .background(
+                                Capsule()
+                                    .fill(Color(.secondaryLabel).opacity(0.10))
+                            )
+                    }
+                    .buttonStyle(ScaleButtonStyle())
+                }
+                .padding(.bottom, 8)
+            }
+
+            PrimaryButton(
+                label: isSpinning ? "Spinning…" : "Spin my fate",
+                disabled: options.count < 2 || isSpinning
+            ) {
+                spin()
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+            .padding(.bottom, 34)
+        }
+        .background(Color.ycBg.shadow(.inner(color: .clear, radius: 0)))
+        .animation(.spring(response: 0.42, dampingFraction: 0.7), value: listOpen)
+        .animation(.spring(response: 0.34, dampingFraction: 0.8), value: rankAllMode)
+        .animation(.spring(response: 0.34, dampingFraction: 0.8), value: winners.count)
+    }
+
+    private var rankAllToggle: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "list.number")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Color.ycPurple)
+            Text("Rank 'em all")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(Color(.label))
+            Spacer()
+            Toggle("", isOn: $rankAllMode)
+                .labelsHidden()
+                .tint(Color.ycPurple)
         }
         .padding(.horizontal, 20)
-        .padding(.top, 20)
-        .padding(.bottom, 34)
-        .background(
-            Color.ycBg
-                .shadow(.inner(color: .clear, radius: 0))
-        )
-        .animation(.spring(response: 0.42, dampingFraction: 0.7), value: listOpen)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+        .onChange(of: rankAllMode) { _, _ in
+            winners = []
+        }
     }
 
     // MARK: - Spin logic
@@ -282,6 +369,44 @@ struct ContentView: View {
                 result = options[winnerIdx]
             }
         }
+    }
+
+    // MARK: - Dismiss result (handles rank mode removal)
+
+    private func dismissResult() {
+        guard let winner = result else { return }
+        if rankAllMode {
+            winners.append(winner)
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.8)) {
+                options.removeAll { $0.id == winner.id }
+            }
+            // If only 1 option remains, auto-rank it
+            if options.count == 1 {
+                winners.append(options[0])
+                withAnimation(.spring(response: 0.34, dampingFraction: 0.8)) {
+                    options.removeAll()
+                }
+            }
+            withAnimation(.easeOut(duration: 0.22)) { result = nil }
+            // Auto-show rankings when all options have been ranked
+            if options.count < 2 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    withAnimation(.spring(response: 0.42, dampingFraction: 0.7)) {
+                        showWinnersSheet = true
+                    }
+                }
+            }
+        } else {
+            withAnimation(.easeOut(duration: 0.22)) { result = nil }
+        }
+    }
+
+    // MARK: - Clear rank results (returns ranked options back to the wheel)
+
+    private func clearRankResults() {
+        result = nil
+        options = winners + options
+        winners = []
     }
 
     // MARK: - Add option

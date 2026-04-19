@@ -7,9 +7,15 @@ import SwiftUI
 
 struct ResultOverlay: View {
     let result: WheelOption
+    let rankPosition: Int?
+    let buttonLabel: String
     let onDismiss: () -> Void
 
     @Environment(\.colorScheme) private var scheme
+
+    private var headerText: String {
+        rankPosition.map { "Pick #\($0)" } ?? "Fate has spoken"
+    }
 
     var body: some View {
         ZStack {
@@ -24,9 +30,9 @@ struct ResultOverlay: View {
 
             // Card
             VStack(spacing: 0) {
-                Text("Fate has spoken")
+                Text(headerText)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(Color(.tertiaryLabel))
+                    .foregroundStyle(rankPosition != nil ? Color.ycPurple.opacity(0.8) : Color(.tertiaryLabel))
                     .kerning(0.96)
                     .textCase(.uppercase)
                     .padding(.bottom, 16)
@@ -46,7 +52,7 @@ struct ResultOverlay: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.bottom, 24)
 
-                PrimaryButton(label: "Sounds good", disabled: false, action: onDismiss)
+                PrimaryButton(label: buttonLabel, disabled: false, action: onDismiss)
             }
             .padding(.horizontal, 24)
             .padding(.top, 28)

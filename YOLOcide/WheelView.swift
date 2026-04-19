@@ -94,13 +94,12 @@ private struct WheelDisc: View {
             ? Color.white.opacity(0.85)
             : Color(red: 0.11, green: 0.11, blue: 0.11).opacity(0.80)
         let pR = polyR
-        // Apothem = perpendicular distance from center to the chord
-        let apothem = n > 1 ? pR * CGFloat(cos(.pi / Double(n))) : pR
-        // Place label at the mid-height of the arc band
-        let labelR: CGFloat = (apothem + r) / 2
-        // Frame width ≈ 85% of chord length
-        let chordLen: CGFloat = n > 1 ? 2 * pR * CGFloat(sin(.pi / Double(n))) : pR
-        let fontSize: CGFloat = max(9, min(13, size * 0.042))
+        let apothem: CGFloat = n > 1 ? pR * CGFloat(cos(.pi / Double(n))) : 0
+        let labelR: CGFloat = n > 1 ? (apothem + r) / 2 : r * 0.67
+        let chordLen: CGFloat = n > 1 ? 2 * pR * CGFloat(sin(.pi / Double(n))) : r * 1.6
+        let fontSize: CGFloat = n == 1
+            ? max(10, min(16, size * 0.06))
+            : max(9, min(13, size * 0.042))
         ForEach(options.indices, id: \.self) { i in
             let midDeg = Double(i) * sa + sa / 2 - 90
             let midRad = midDeg * .pi / 180
@@ -110,7 +109,9 @@ private struct WheelDisc: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
                 .frame(width: chordLen * 0.85)
-                .rotationEffect(.degrees(midDeg + 90))
+                // For n=1 the segment spans the full circle — render the label
+                // horizontally at mid-ring so it doesn't land upside-down at the edge.
+                .rotationEffect(.degrees(n == 1 ? 0 : midDeg + 90))
                 .position(x: cx + labelR * CGFloat(cos(midRad)),
                           y: cy + labelR * CGFloat(sin(midRad)))
         }
