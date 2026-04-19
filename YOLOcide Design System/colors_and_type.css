@@ -1,0 +1,203 @@
+/* =========================================================
+   YOLOcide — Colors & Type tokens
+   Inspired by iOS Liquid Glass + Radix UI. Soft pastels,
+   translucent surfaces, vibrant purple accent.
+   ========================================================= */
+
+/* ---- Type: SF Pro Display is Apple-only.
+   We fall back to system fonts first (real SF on Apple devices),
+   then Inter from Google Fonts as a visual stand-in on web. ----- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* ---------- Wheel palette — soft pastels (light mode) ---------- */
+  --wheel-lavender: #c8bfff;   /* lavender  */
+  --wheel-sky:      #bfdcff;   /* sky blue  */
+  --wheel-mint:     #bfeed6;   /* mint      */
+  --wheel-peach:    #ffd4b8;   /* peach     */
+  --wheel-rose:     #ffc1d0;   /* rose      */
+  --wheel-violet:   #d8b8ff;   /* violet    */
+  --wheel-butter:   #ffe8a8;   /* butter (extension) */
+  --wheel-aqua:     #b8ecec;   /* aqua (extension)   */
+
+  /* ---------- Brand purple ---------- */
+  --purple-50:  #f3f0ff;
+  --purple-100: #e4defc;
+  --purple-300: #b5a8f3;
+  --purple-500: #6c5ce7;  /* Spin my fate — primary action */
+  --purple-600: #5b4bd1;
+  --purple-700: #4a3dba;
+
+  /* ---------- Neutral — light ---------- */
+  --bg:            #f4f4f7;   /* app canvas */
+  --bg-elev:       #ffffff;   /* elevated surface */
+  --surface-glass: rgba(255,255,255,0.72); /* frosted white */
+  --surface-glass-strong: rgba(255,255,255,0.88);
+  --hairline:      rgba(0,0,0,0.08);
+  --divider:       #ffffff;   /* wheel segment separators */
+
+  /* text */
+  --fg1: #1c1c1e;  /* primary label */
+  --fg2: #48484a;  /* secondary */
+  --fg3: #8e8e93;  /* tertiary (iOS systemGray) */
+  --fg-on-color: #ffffff;  /* white text sits on all pastel slices */
+  --fg-on-purple: #ffffff;
+
+  /* shadows — soft, iOS-ish */
+  --shadow-sm: 0 1px 2px rgba(16,16,32,0.05), 0 1px 1px rgba(16,16,32,0.04);
+  --shadow-md: 0 6px 18px rgba(30,24,70,0.08), 0 2px 6px rgba(30,24,70,0.05);
+  --shadow-lg: 0 20px 40px rgba(30,24,70,0.12), 0 8px 16px rgba(30,24,70,0.06);
+  --shadow-wheel: 0 24px 60px rgba(60,40,140,0.18), 0 8px 20px rgba(60,40,140,0.10);
+  --shadow-inner-cap: inset 0 1px 2px rgba(255,255,255,0.9), inset 0 -1px 3px rgba(0,0,0,0.06);
+
+  /* blur values */
+  --blur-sm: 12px;
+  --blur-md: 20px;
+  --blur-lg: 30px;
+
+  /* radii */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;  /* option pill */
+  --radius-lg: 20px;  /* card */
+  --radius-xl: 28px;  /* primary button */
+  --radius-pill: 999px;
+
+  /* spacing (4pt grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* motion — spring-ish */
+  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring-soft:cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out:        cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast:   180ms;
+  --dur-base:   260ms;
+  --dur-slow:   420ms;
+  --dur-spin:   3600ms; /* wheel spin */
+
+  /* type */
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+  --font-text:    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+
+  /* semantic type scale (iOS-ish) */
+  --t-largetitle: 800 34px/40px var(--font-display); /* app title */
+  --t-title1:     700 28px/34px var(--font-display);
+  --t-title2:     700 22px/28px var(--font-display);
+  --t-title3:     600 20px/25px var(--font-display);
+  --t-headline:   600 17px/22px var(--font-text);
+  --t-body:       500 17px/22px var(--font-text);
+  --t-callout:    500 16px/21px var(--font-text);
+  --t-subhead:    500 15px/20px var(--font-text);
+  --t-footnote:   500 13px/18px var(--font-text);
+  --t-caption:    500 12px/16px var(--font-text);
+  --t-button:     600 17px/22px var(--font-text);
+  --t-wheel-label:700 15px/18px var(--font-display); /* white text rotated on slice */
+
+  /* letter spacing — tight for display, default otherwise */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0em;
+}
+
+/* ---------------- Dark mode ---------------- */
+/* "dark #3a3d4a background; same pastels at ~70% opacity" */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:            #3a3d4a;
+    --bg-elev:       #454856;
+    --surface-glass: rgba(255,255,255,0.10);
+    --surface-glass-strong: rgba(255,255,255,0.18);
+    --hairline:      rgba(255,255,255,0.10);
+    --divider:       rgba(255,255,255,0.55);
+
+    --fg1: #f2f2f7;
+    --fg2: #c7c7cc;
+    --fg3: #98989f;
+
+    /* pastels dropped to ~70% */
+    --wheel-lavender: rgba(200,191,255,0.70);
+    --wheel-sky:      rgba(191,220,255,0.70);
+    --wheel-mint:     rgba(191,238,214,0.70);
+    --wheel-peach:    rgba(255,212,184,0.70);
+    --wheel-rose:     rgba(255,193,208,0.70);
+    --wheel-violet:   rgba(216,184,255,0.70);
+    --wheel-butter:   rgba(255,232,168,0.70);
+    --wheel-aqua:     rgba(184,236,236,0.70);
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+    --shadow-md: 0 6px 18px rgba(0,0,0,0.35);
+    --shadow-lg: 0 20px 40px rgba(0,0,0,0.45);
+    --shadow-wheel: 0 24px 60px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.35);
+  }
+}
+
+/* ---- Forced palette helpers so components can opt into a mode ---- */
+[data-theme="light"] {
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #3a3d4a;
+  --bg-elev: #454856;
+  --surface-glass: rgba(255,255,255,0.10);
+  --surface-glass-strong: rgba(255,255,255,0.18);
+  --hairline: rgba(255,255,255,0.10);
+  --divider: rgba(255,255,255,0.55);
+  --fg1: #f2f2f7;
+  --fg2: #c7c7cc;
+  --fg3: #98989f;
+  --wheel-lavender: rgba(200,191,255,0.70);
+  --wheel-sky:      rgba(191,220,255,0.70);
+  --wheel-mint:     rgba(191,238,214,0.70);
+  --wheel-peach:    rgba(255,212,184,0.70);
+  --wheel-rose:     rgba(255,193,208,0.70);
+  --wheel-violet:   rgba(216,184,255,0.70);
+  --wheel-butter:   rgba(255,232,168,0.70);
+  --wheel-aqua:     rgba(184,236,236,0.70);
+  --shadow-wheel: 0 24px 60px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.35);
+}
+
+/* ---------------- Base resets ---------------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  font: var(--t-body);
+  color: var(--fg1);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------------- Semantic utilities ---------------- */
+.yc-largetitle { font: var(--t-largetitle); letter-spacing: var(--tracking-tight); }
+.yc-title1     { font: var(--t-title1);     letter-spacing: var(--tracking-tight); }
+.yc-title2     { font: var(--t-title2);     letter-spacing: var(--tracking-tight); }
+.yc-title3     { font: var(--t-title3); }
+.yc-headline   { font: var(--t-headline); }
+.yc-body       { font: var(--t-body); }
+.yc-callout    { font: var(--t-callout); }
+.yc-subhead    { font: var(--t-subhead); color: var(--fg2); }
+.yc-footnote   { font: var(--t-footnote); color: var(--fg3); }
+.yc-caption    { font: var(--t-caption);  color: var(--fg3); }
+
+/* ---------------- Surfaces ---------------- */
+.yc-glass {
+  background: var(--surface-glass);
+  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(1.4);
+  backdrop-filter: blur(var(--blur-md)) saturate(1.4);
+  border: 1px solid var(--hairline);
+}
+
+.yc-card {
+  background: var(--bg-elev);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}

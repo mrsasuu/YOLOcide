@@ -1,0 +1,14 @@
+<!-- Preview card base — used by every card in /preview -->
+<style>
+  @import url('../colors_and_type.css');
+  html, body { background: transparent; overflow: hidden; }
+  body {
+    padding: 20px;
+    font: var(--t-body);
+    color: var(--fg1);
+  }
+  .card-row { display: flex; gap: 16px; align-items: stretch; flex-wrap: wrap; }
+  .card-col { display: flex; flex-direction: column; gap: 8px; }
+  .label { font: var(--t-caption); color: var(--fg3); letter-spacing: 0.02em; text-transform: uppercase; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--fg3); }
+</style>

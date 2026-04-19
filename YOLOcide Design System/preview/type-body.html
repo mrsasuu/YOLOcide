@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Type Body</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { background: transparent; overflow: hidden; margin: 0; }
+  body { padding: 22px 24px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .row { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 16px; }
+  .meta { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--fg3); white-space: nowrap; }
+  .hl { font: 600 17px/22px var(--font-text); }
+  .body { font: 500 17px/22px var(--font-text); }
+  .call { font: 500 16px/21px var(--font-text); }
+  .sub { font: 500 15px/20px var(--font-text); color: var(--fg2); }
+  .foot { font: 500 13px/18px var(--font-text); color: var(--fg3); }
+  .btn { font: 600 17px/22px var(--font-text); color: #6c5ce7; }
+</style>
+</head>
+<body>
+  <div class="grid">
+    <div class="row"><div class="hl">Headline — spin my fate</div><div class="meta">Headline · 600 / 17</div></div>
+    <div class="row"><div class="body">Body — add options you're torn between and let the wheel decide.</div><div class="meta">Body · 500 / 17</div></div>
+    <div class="row"><div class="sub">Subhead — six options work best</div><div class="meta">Subhead · 500 / 15</div></div>
+    <div class="row"><div class="foot">Footnote — tap a color dot to recolor</div><div class="meta">Footnote · 500 / 13</div></div>
+    <div class="row"><div class="btn">Button — Spin my fate</div><div class="meta">Button · 600 / 17</div></div>
+  </div>
+</body>
+</html>

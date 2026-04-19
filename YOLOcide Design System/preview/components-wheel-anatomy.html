@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Wheel Anatomy</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { background: transparent; overflow: hidden; margin: 0; }
+  body { padding: 10px; display: grid; place-items: center; }
+  .stage { position: relative; width: 260px; height: 230px; }
+  .wheel {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    width: 200px; height: 200px;
+    filter: drop-shadow(0 16px 30px rgba(60,40,140,0.18));
+  }
+  .cap {
+    position: absolute; left: 50%; top: 50%; width: 62px; height: 62px;
+    transform: translate(-50%,-50%); border-radius: 999px;
+    background: rgba(255,255,255,0.85);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.9), inset 0 -1px 3px rgba(0,0,0,0.06);
+    display: grid; place-items: center;
+    color: #6c5ce7; font: 700 16px/1 var(--font-display); letter-spacing: -0.02em;
+  }
+  .pointer {
+    position: absolute; left: 50%; top: 6px; transform: translateX(-50%);
+    width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent;
+    border-top: 11px solid #1c1c1e;
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <svg class="wheel" viewBox="-100 -100 200 200">
+      <!-- 6 slices -->
+      <path d="M0,0 L100,0 A100,100 0 0,1 50,86.6 Z" fill="#c8bfff"/>
+      <path d="M0,0 L50,86.6 A100,100 0 0,1 -50,86.6 Z" fill="#bfdcff"/>
+      <path d="M0,0 L-50,86.6 A100,100 0 0,1 -100,0 Z" fill="#bfeed6"/>
+      <path d="M0,0 L-100,0 A100,100 0 0,1 -50,-86.6 Z" fill="#ffd4b8"/>
+      <path d="M0,0 L-50,-86.6 A100,100 0 0,1 50,-86.6 Z" fill="#ffc1d0"/>
+      <path d="M0,0 L50,-86.6 A100,100 0 0,1 100,0 Z" fill="#d8b8ff"/>
+      <!-- dividers -->
+      <g stroke="#fff" stroke-width="2" stroke-linecap="round">
+        <line x1="0" y1="0" x2="100" y2="0"/>
+        <line x1="0" y1="0" x2="50" y2="86.6"/>
+        <line x1="0" y1="0" x2="-50" y2="86.6"/>
+        <line x1="0" y1="0" x2="-100" y2="0"/>
+        <line x1="0" y1="0" x2="-50" y2="-86.6"/>
+        <line x1="0" y1="0" x2="50" y2="-86.6"/>
+      </g>
+      <!-- labels -->
+      <g font-family="-apple-system, 'SF Pro Display', Inter, sans-serif" font-weight="700" font-size="11" fill="#fff">
+        <text x="60" y="22" transform="rotate(30 60 22)">Tacos</text>
+        <text x="10" y="76" transform="rotate(90 10 76)">Sushi</text>
+        <text x="-70" y="52" transform="rotate(150 -70 52)">Salad</text>
+        <text x="-80" y="-12" transform="rotate(-150 -80 -12)">Pizza</text>
+        <text x="-26" y="-64" transform="rotate(-90 -26 -64)">Ramen</text>
+        <text x="40" y="-46" transform="rotate(-30 40 -46)">Pho</text>
+      </g>
+    </svg>
+    <div class="cap">Spin!</div>
+    <div class="pointer"></div>
+  </div>
+</body>
+</html>

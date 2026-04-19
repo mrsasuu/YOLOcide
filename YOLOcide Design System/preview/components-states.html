@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>States</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { background: transparent; overflow: hidden; margin: 0; }
+  body { padding: 18px 24px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; align-items: center; }
+  .sw { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .btn { background: #6c5ce7; color: #fff; border: 0; font: 600 14px/1 var(--font-text); padding: 12px 18px; border-radius: 999px; }
+  .default  { box-shadow: 0 8px 20px rgba(108,92,231,0.28), inset 0 1px 0 rgba(255,255,255,0.22); }
+  .hover    { box-shadow: 0 14px 28px rgba(108,92,231,0.38), inset 0 1px 0 rgba(255,255,255,0.22); transform: translateY(-1px); }
+  .pressed  { transform: scale(0.97); box-shadow: 0 4px 10px rgba(108,92,231,0.28); }
+  .focused  { box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(108,92,231,0.6); }
+  .disabled { opacity: 0.4; }
+  .label { font: 500 11px/1 var(--font-text); color: var(--fg3); }
+</style>
+</head>
+<body>
+  <div class="sw"><button class="btn default">Spin</button><div class="label">Default</div></div>
+  <div class="sw"><button class="btn hover">Spin</button><div class="label">Hover</div></div>
+  <div class="sw"><button class="btn pressed">Spin</button><div class="label">Pressed · scale(0.97)</div></div>
+  <div class="sw"><button class="btn focused">Spin</button><div class="label">Focused</div></div>
+</body>
+</html>

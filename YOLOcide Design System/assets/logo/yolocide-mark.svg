@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -40 80 80" width="80" height="80">
+  <circle r="34" fill="#f4f4f7"></circle>
+  <path d="M0,0 L34,0 A34,34 0 0,1 17,29.44 Z" fill="#c8bfff"></path>
+  <path d="M0,0 L17,29.44 A34,34 0 0,1 -17,29.44 Z" fill="#bfdcff"></path>
+  <path d="M0,0 L-17,29.44 A34,34 0 0,1 -34,0 Z" fill="#bfeed6"></path>
+  <path d="M0,0 L-34,0 A34,34 0 0,1 -17,-29.44 Z" fill="#ffd4b8"></path>
+  <path d="M0,0 L-17,-29.44 A34,34 0 0,1 17,-29.44 Z" fill="#ffc1d0"></path>
+  <path d="M0,0 L17,-29.44 A34,34 0 0,1 34,0 Z" fill="#d8b8ff"></path>
+  <g stroke="#fff" stroke-width="2" stroke-linecap="round">
+    <line x1="0" y1="0" x2="34" y2="0"></line>
+    <line x1="0" y1="0" x2="17" y2="29.44"></line>
+    <line x1="0" y1="0" x2="-17" y2="29.44"></line>
+    <line x1="0" y1="0" x2="-34" y2="0"></line>
+    <line x1="0" y1="0" x2="-17" y2="-29.44"></line>
+    <line x1="0" y1="0" x2="17" y2="-29.44"></line>
+  </g>
+  <circle r="10" fill="rgba(255,255,255,0.88)"></circle>
+  <circle r="10" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="0.75"></circle>
+  <path d="M0,-36 L-5,-29 L5,-29 Z" fill="#1c1c1e"></path>
+</svg>

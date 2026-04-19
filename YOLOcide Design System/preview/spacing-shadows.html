@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Shadows</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { background: transparent; overflow: hidden; margin: 0; }
+  body { padding: 26px 24px; }
+  .row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+  .sw { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  .chip { width: 96px; height: 72px; border-radius: 16px; background: #fff; }
+  .sm { box-shadow: 0 1px 2px rgba(16,16,32,0.05), 0 1px 1px rgba(16,16,32,0.04); }
+  .md { box-shadow: 0 6px 18px rgba(30,24,70,0.08), 0 2px 6px rgba(30,24,70,0.05); }
+  .lg { box-shadow: 0 20px 40px rgba(30,24,70,0.12), 0 8px 16px rgba(30,24,70,0.06); }
+  .wheel { box-shadow: 0 24px 60px rgba(60,40,140,0.18), 0 8px 20px rgba(60,40,140,0.10); }
+  .name { font: 600 12px/1 var(--font-text); }
+  .meta { font-family: ui-monospace, Menlo, monospace; font-size: 10px; color: var(--fg3); }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="sw"><div class="chip sm"></div><div class="name">sm</div><div class="meta">subtle</div></div>
+    <div class="sw"><div class="chip md"></div><div class="name">md</div><div class="meta">card</div></div>
+    <div class="sw"><div class="chip lg"></div><div class="name">lg</div><div class="meta">modal</div></div>
+    <div class="sw"><div class="chip wheel"></div><div class="name">wheel</div><div class="meta">violet bloom</div></div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Brand Purple Scale</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { background: transparent; overflow: hidden; margin: 0; }
+  body { padding: 20px 24px; }
+  .row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+  .sw { display: flex; flex-direction: column; gap: 8px; }
+  .chip { height: 84px; border-radius: 14px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04); }
+  .chip.primary { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2), 0 6px 18px rgba(108,92,231,0.28); position: relative; }
+  .chip.primary::after {
+    content: "Primary"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: #fff; font: 700 13px/1 var(--font-display); letter-spacing: -0.01em;
+  }
+  .name  { font: 600 13px/1 var(--font-text); color: var(--fg1); }
+  .hex   { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--fg3); }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:#f3f0ff"></div><div class="name">Purple 50</div><div class="hex">#F3F0FF</div></div>
+    <div class="sw"><div class="chip" style="background:#e4defc"></div><div class="name">Purple 100</div><div class="hex">#E4DEFC</div></div>
+    <div class="sw"><div class="chip" style="background:#b5a8f3"></div><div class="name">Purple 300</div><div class="hex">#B5A8F3</div></div>
+    <div class="sw"><div class="chip primary" style="background:#6c5ce7"></div><div class="name">Purple 500</div><div class="hex">#6C5CE7</div></div>
+    <div class="sw"><div class="chip" style="background:#4a3dba"></div><div class="name">Purple 700</div><div class="hex">#4A3DBA</div></div>
+  </div>
+</body>
+</html>

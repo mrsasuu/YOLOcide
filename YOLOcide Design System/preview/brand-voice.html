@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Voice & Copy</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { background: transparent; overflow: hidden; margin: 0; }
+  body { padding: 18px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font: 500 14px/1.4 var(--font-text); }
+  .col { display: flex; flex-direction: column; gap: 8px; }
+  .h { font: 700 12px/1 var(--font-text); letter-spacing: 0.06em; text-transform: uppercase; }
+  .ok .h { color: #3a8f5a; }
+  .no .h { color: #b23a3a; }
+  .ex { padding: 8px 12px; border-radius: 10px; }
+  .ok .ex { background: rgba(191,238,214,0.55); color: #1c1c1e; }
+  .no .ex { background: rgba(255,193,208,0.55); color: #1c1c1e; text-decoration: line-through; text-decoration-color: rgba(0,0,0,0.3); }
+</style>
+</head>
+<body>
+  <div class="col ok">
+    <div class="h">Sounds like YOLOcide</div>
+    <div class="ex">Spin my fate</div>
+    <div class="ex">Fate has spoken.</div>
+    <div class="ex">Nothing to decide yet.</div>
+    <div class="ex">Delete? Fate will forget it.</div>
+  </div>
+  <div class="col no">
+    <div class="h">Sounds corporate</div>
+    <div class="ex">Submit selection</div>
+    <div class="ex">Your choice has been made</div>
+    <div class="ex">No items to display</div>
+    <div class="ex">Are you sure you want to proceed?</div>
+  </div>
+</body>
+</html>

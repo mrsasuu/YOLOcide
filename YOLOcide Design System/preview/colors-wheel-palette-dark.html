@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Wheel Palette — Dark</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { background: #3a3d4a; overflow: hidden; margin: 0; }
+  body { padding: 20px 24px; color: #f2f2f7; }
+  .row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+  .sw { display: flex; flex-direction: column; gap: 8px; }
+  .chip {
+    height: 68px; border-radius: 14px; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font: 700 15px/1 var(--font-display); letter-spacing: -0.01em;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+  }
+  .chip::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1.5px; background: rgba(255,255,255,0.55); }
+  .name  { font: 600 13px/1 var(--font-text); color: #f2f2f7; }
+  .hex   { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: #98989f; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:rgba(200,191,255,0.7)">Lavender</div><div class="name">Lavender</div><div class="hex">70% α</div></div>
+    <div class="sw"><div class="chip" style="background:rgba(191,220,255,0.7)">Sky</div><div class="name">Sky</div><div class="hex">70% α</div></div>
+    <div class="sw"><div class="chip" style="background:rgba(191,238,214,0.7)">Mint</div><div class="name">Mint</div><div class="hex">70% α</div></div>
+    <div class="sw"><div class="chip" style="background:rgba(255,212,184,0.7)">Peach</div><div class="name">Peach</div><div class="hex">70% α</div></div>
+    <div class="sw"><div class="chip" style="background:rgba(255,193,208,0.7)">Rose</div><div class="name">Rose</div><div class="hex">70% α</div></div>
+    <div class="sw"><div class="chip" style="background:rgba(216,184,255,0.7)">Violet</div><div class="name">Violet</div><div class="hex">70% α</div></div>
+  </div>
+</body>
+</html>

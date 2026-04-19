@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Logo</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { background: transparent; overflow: hidden; margin: 0; }
+  body { padding: 20px 24px; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 18px; }
+  .card { padding: 18px; border-radius: 18px; display: grid; place-items: center; height: 110px; }
+  .light { background: #f4f4f7; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
+  .dark { background: #3a3d4a; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); }
+  .mark-wrap { display: flex; align-items: center; gap: 14px; }
+  .title { font: 800 32px/1 var(--font-display); letter-spacing: -0.03em; color: #1c1c1e; }
+  .title .a { color: #6c5ce7; }
+  .title-dark { color: #f2f2f7; }
+</style>
+</head>
+<body>
+  <div class="card light">
+    <div class="mark-wrap">
+      <img src="../assets/logo/yolocide-mark.svg" width="56" height="56" alt=""/>
+      <div class="title">YOLO<span class="a">cide</span></div>
+    </div>
+  </div>
+  <div class="card dark">
+    <div class="mark-wrap">
+      <img src="../assets/logo/yolocide-mark.svg" width="56" height="56" alt=""/>
+      <div class="title title-dark">YOLO<span class="a">cide</span></div>
+    </div>
+  </div>
+</body>
+</html>

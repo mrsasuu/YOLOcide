@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>YOLOcide — iOS UI Kit</title>
+<link rel="stylesheet" href="../../colors_and_type.css"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #eef0f5; min-height: 100vh; }
+  body {
+    font-family: -apple-system, "SF Pro Display", Inter, system-ui, sans-serif;
+    color: #1c1c1e;
+    padding: 40px 20px 60px;
+  }
+  .header { text-align: center; margin-bottom: 28px; }
+  .header h1 { font-weight: 800; font-size: 38px; letter-spacing: -0.03em; margin: 0 0 4px; }
+  .header h1 .a { color: #6c5ce7; }
+  .header p  { color: #8e8e93; margin: 0; font-size: 15px; }
+  .stage { display: flex; gap: 48px; justify-content: center; flex-wrap: wrap; }
+  .frame-label { text-align: center; margin-top: 14px; font-size: 13px; color: #8e8e93; font-weight: 500; }
+  .toggle-row {
+    display: flex; gap: 8px; justify-content: center; align-items: center;
+    margin: 18px 0 28px;
+  }
+  .toggle-btn {
+    padding: 10px 16px; border-radius: 999px; border: 0; cursor: pointer;
+    background: #fff; color: #1c1c1e; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    font: 500 14px -apple-system, "SF Pro Text", Inter, sans-serif;
+  }
+  .toggle-btn.active { background: #6c5ce7; color: #fff; box-shadow: 0 6px 16px rgba(108,92,231,0.28); }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>YOLO<span class="a">cide</span> — UI Kit</h1>
+    <p>iOS recreation. Default state, list state, and the result moment.</p>
+  </div>
+
+  <div class="toggle-row">
+    <button class="toggle-btn active" id="lightBtn">Light</button>
+    <button class="toggle-btn" id="darkBtn">Dark</button>
+  </div>
+
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="ios-frame.jsx"></script>
+  <script type="text/babel" src="Wheel.jsx"></script>
+  <script type="text/babel" src="OptionRow.jsx"></script>
+  <script type="text/babel" src="Chrome.jsx"></script>
+  <script type="text/babel" src="Screen.jsx"></script>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    function Frame({ dark, label, children }) {
+      return (
+        <div>
+          <IOSDevice dark={dark} width={360} height={760}>{children}</IOSDevice>
+          <div className="frame-label">{label}</div>
+        </div>
+      );
+    }
+
+    // Pre-configured states — each mounts its own <YolocideScreen>
+    // but starts from different initial conditions.
+    function App() {
+      const [dark, setDark] = useState(false);
+
+      React.useEffect(() => {
+        document.getElementById('lightBtn').onclick = () => setDark(false);
+        document.getElementById('darkBtn').onclick  = () => setDark(true);
+        document.getElementById('lightBtn').className = 'toggle-btn' + (!dark ? ' active' : '');
+        document.getElementById('darkBtn').className  = 'toggle-btn' + (dark ? ' active' : '');
+      }, [dark]);
+
+      return (
+        <div className="stage">
+          <Frame dark={dark} label="Default · full wheel + CTA">
+            <YolocideScreen dark={dark} key={'a' + dark} />
+          </Frame>
+          <Frame dark={dark} label="List state · Show options expanded">
+            <YolocideScreenInitialOpen dark={dark} key={'b' + dark} />
+          </Frame>
+          <Frame dark={dark} label="Result moment · fate has spoken">
+            <YolocideScreenWithResult dark={dark} key={'c' + dark} />
+          </Frame>
+        </div>
+      );
+    }
+
+    // Wrapper that forces list open on mount
+    function YolocideScreenInitialOpen({ dark }) {
+      React.useEffect(() => {
+        // hack: find toggle button and click it once
+        const t = setTimeout(() => {
+          const btns = document.querySelectorAll('button');
+          for (const b of btns) {
+            if (b.textContent.trim().startsWith('Show options') && b.closest('[data-variant="open"]')) { b.click(); break; }
+          }
+        }, 50);
+        return () => clearTimeout(t);
+      }, []);
+      return <div data-variant="open" style={{width:'100%',height:'100%'}}><YolocideScreen dark={dark}/></div>;
+    }
+
+    function YolocideScreenWithResult({ dark }) {
+      // Shows result modal automatically via a small override
+      const [show, setShow] = useState(true);
+      return (
+        <div style={{width:'100%',height:'100%',position:'relative'}}>
+          <YolocideScreen dark={dark}/>
+          {show && (
+            <ResultBanner
+              dark={dark}
+              result={{ label: 'Tacos', color: '#ffd4b8' }}
+              onDismiss={() => setShow(false)}
+            />
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>

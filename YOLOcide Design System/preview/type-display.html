@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Type Display</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { background: transparent; overflow: hidden; margin: 0; }
+  body { padding: 22px 24px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .row { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 16px; }
+  .meta { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--fg3); white-space: nowrap; }
+  .t0 { font: 800 34px/40px var(--font-display); letter-spacing: -0.03em; }
+  .t0 .accent { color: #6c5ce7; }
+  .t1 { font: 700 28px/34px var(--font-display); letter-spacing: -0.02em; }
+  .t2 { font: 700 22px/28px var(--font-display); letter-spacing: -0.02em; }
+</style>
+</head>
+<body>
+  <div class="grid">
+    <div class="row"><div class="t0">YOLO<span class="accent">cide</span></div><div class="meta">Large title · 800 / 34 / −0.03em</div></div>
+    <div class="row"><div class="t1">Fate has spoken.</div><div class="meta">Title 1 · 700 / 28</div></div>
+    <div class="row"><div class="t2">Pick your poison</div><div class="meta">Title 2 · 700 / 22</div></div>
+  </div>
+</body>
+</html>
