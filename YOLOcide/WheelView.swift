@@ -40,8 +40,8 @@ private struct WheelDividers: View {
                 var line = Path()
                 line.move(to: center)
                 line.addLine(to: CGPoint(
-                    x: center.x + radius * cos(rad),
-                    y: center.y + radius * sin(rad)
+                    x: center.x + radius * CGFloat(cos(rad)),
+                    y: center.y + radius * CGFloat(sin(rad))
                 ))
                 ctx.stroke(line, with: .color(color), lineWidth: 2)
             }
@@ -104,7 +104,7 @@ private struct WheelDisc: View {
                 .minimumScaleFactor(0.5)
                 .frame(width: frameW)
                 .rotationEffect(.degrees(midDeg + 90))
-                .position(x: cx + labelR * cos(midRad), y: cy + labelR * sin(midRad))
+                .position(x: cx + labelR * CGFloat(cos(midRad)), y: cy + labelR * CGFloat(sin(midRad)))
         }
     }
 }
