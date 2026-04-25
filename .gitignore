@@ -1,0 +1,140 @@
+# ============================================================
+# macOS
+# ============================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+**/.DS_Store
+
+
+# ============================================================
+# iOS / Xcode
+# ============================================================
+
+# Build output
+build/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Code signing
+*.p12
+*.mobileprovision
+*.certSigningRequest
+*.cer
+
+# User-specific Xcode settings
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+
+# Xcode workspace
+*.xcworkspace/xcuserdata/
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+Package.resolved
+
+# CocoaPods
+Pods/
+*.xcworkspace
+Podfile.lock
+
+# Carthage
+Carthage/Build/
+Carthage/Checkouts/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+
+# AppCode
+.idea/
+*.iml
+
+# Instruments
+*.trace
+
+# TestFlight / App Store Connect
+*.app.dSYM.zip
+
+
+# ============================================================
+# Go (backend)
+# ============================================================
+
+# Compiled binaries and executables
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+
+# Test output
+*.test
+*.out
+coverage.out
+coverage.html
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Vendor directory (uncomment if not committing vendor/)
+# vendor/
+
+# Air (live reload)
+tmp/
+.air.toml
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.secret
+secrets/
+
+# Logs
+*.log
+logs/
+
+
+# ============================================================
+# Editors & IDEs
+# ============================================================
+
+# VS Code
+.vscode/
+
+# JetBrains (GoLand, AppCode, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Vim / Neovim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+\#*\#
+.emacs.desktop
+.emacs.desktop.lock
