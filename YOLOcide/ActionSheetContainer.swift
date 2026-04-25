@@ -73,14 +73,20 @@ struct ActionSheetContainer<Content: View>: View {
     @StateObject private var keyboardHelper = KeyboardHeightHelper()
     @State private var dragOffset: CGFloat = 0
     @Environment(\.colorScheme) private var scheme
-    
+
+    private func closeSheet() {
+        guard keyboardHelper.keyboardHeight > 0 else { onClose(); return }
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { onClose() }
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
             // Backdrop - appears instantly
             Color.black.opacity(0.35)
                 .background(.ultraThinMaterial)
                 .ignoresSafeArea()
-                .onTapGesture(perform: onClose)
+                .onTapGesture(perform: closeSheet)
                 .transition(.opacity)
             
             // Sheet card with drag gesture
@@ -113,7 +119,7 @@ struct ActionSheetContainer<Content: View>: View {
                     .onEnded { gesture in
                         if gesture.translation.height > 100 || gesture.predictedEndLocation.y > gesture.startLocation.y + 100 {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                onClose()
+                                closeSheet()
                             }
                         } else {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
