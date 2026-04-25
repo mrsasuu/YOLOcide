@@ -107,6 +107,11 @@ final class SettingsStore: ObservableObject {
         "help.settings.appearance.light":  "Light",
         "help.settings.appearance.dark":   "Dark",
         "help.settings.haptics":           "Haptic feedback",
+        "add.option":                      "Add option",
+        "signin.title":                    "Welcome to YOLOcide",
+        "signin.subtitle":                 "Sign in to save your wheels and rankings across devices.",
+        "signin.google":                   "Continue with Google",
+        "signin.later":                    "Maybe later",
     ]
 
     // MARK: - Spanish
@@ -157,5 +162,10 @@ final class SettingsStore: ObservableObject {
         "help.settings.appearance.light":  "Claro",
         "help.settings.appearance.dark":   "Oscuro",
         "help.settings.haptics":           "Vibración táctil",
+        "add.option":                      "Añadir opción",
+        "signin.title":                    "Bienvenido a YOLOcide",
+        "signin.subtitle":                 "Inicia sesión para guardar tus ruletas y rankings en todos tus dispositivos.",
+        "signin.google":                   "Continuar con Google",
+        "signin.later":                    "Quizás después",
     ]
 }

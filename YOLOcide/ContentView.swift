@@ -27,9 +27,12 @@ struct ContentView: View {
     @State private var lastSpinOptions: [WheelOption] = []
     @State private var lastSegmentIndex: Int = -1
     @State private var segmentCheckTimer: Timer? = nil
-    @State private var spinStartTime: Date? = nil
+    @State private var spinStartTime: CFTimeInterval = -1
     @State private var spinStartRotation: Double = 0
     @State private var spinEndRotation: Double = 0
+    @State private var showSignIn = false
+    @State private var impactFeedback = UIImpactFeedbackGenerator(style: .light)
+    @State private var lastHapticFire: CFTimeInterval = 0
 
     @Environment(\.colorScheme) private var scheme
 
@@ -60,6 +63,9 @@ struct ContentView: View {
                             .combined(with: .opacity)
                         )
                 } else {
+                    addOptionInlineButton
+                        .padding(.top, 12)
+                        .transition(.opacity)
                     Spacer(minLength: 0)
                 }
             }
@@ -116,6 +122,17 @@ struct ContentView: View {
                 )
                 .zIndex(20)
             }
+
+            if showSignIn {
+                SignInView {
+                    withAnimation(.spring(response: 0.34, dampingFraction: 0.8)) {
+                        showSignIn = false
+                    }
+                }
+                .environmentObject(settings)
+                .zIndex(25)
+                .transition(.opacity)
+            }
         }
         .fullScreenCover(isPresented: $showHistory) {
             HistoryView()
@@ -134,6 +151,33 @@ struct ContentView: View {
         }
         .onDisappear {
             stopSegmentMonitoring()
+        }
+        .onAppear {
+            prewarmRenderers()
+        }
+    }
+
+    // MARK: - Renderer pre-warming
+
+    private func prewarmRenderers() {
+        // UIKit is the only reliable way to force UIBlurEffect / Metal shader
+        // compilation before the first sheet appears. SwiftUI's .ultraThinMaterial
+        // on a clear or tiny view is often culled by the render server.
+        if let window = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first?.windows.first {
+            let warmup = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
+            warmup.frame = CGRect(x: -1, y: -1, width: 1, height: 1)
+            window.addSubview(warmup)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                warmup.removeFromSuperview()
+            }
+        }
+        // CoreAnimation's timingCurve interpolation driver compiles on first
+        // use. One frame (0.016 s) is the minimum for a real CA transaction;
+        // anything shorter may be short-circuited without compiling shaders.
+        withAnimation(.timingCurve(0.16, 1, 0.3, 1, duration: 0.016)) {
+            rotation = 0.001
         }
     }
 
@@ -163,13 +207,13 @@ struct ContentView: View {
             .buttonStyle(ScaleButtonStyle())
             .padding(.trailing, 8)
 
-            // Glass "+" button
+            // Sign in button
             Button {
                 withAnimation(.spring(response: 0.34, dampingFraction: 0.8)) {
-                    showAddSheet = true
+                    showSignIn = true
                 }
             } label: {
-                headerIcon("plus", size: 20)
+                headerIcon("person.crop.circle", size: 20)
             }
             .buttonStyle(ScaleButtonStyle())
         }
@@ -243,6 +287,35 @@ struct ContentView: View {
             .padding(.vertical, 10)
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - Inline add option button
+
+    private var addOptionInlineButton: some View {
+        Button {
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.8)) {
+                showAddSheet = true
+            }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "plus")
+                    .font(.system(size: 14, weight: .bold))
+                Text(settings.t("add.option"))
+                    .font(.system(size: 15, weight: .semibold))
+            }
+            .foregroundStyle(Color.ycPurple)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(
+                Capsule()
+                    .fill(Color.ycPurple.opacity(0.12))
+                    .overlay(
+                        Capsule()
+                            .stroke(Color.ycPurple.opacity(0.20), lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(ScaleButtonStyle())
     }
 
     // MARK: - Options list
@@ -421,6 +494,12 @@ struct ContentView: View {
         // Start monitoring segment changes for haptic feedback
         startSegmentMonitoring()
 
+        // Prepare haptic engine after animation is already queued so it
+        // doesn't add latency to the spin() call itself.
+        if settings.hapticsEnabled {
+            DispatchQueue.main.async { impactFeedback.prepare() }
+        }
+
         // cubic-bezier(0.16, 1, 0.3, 1) ≈ SwiftUI timingCurve
         withAnimation(.timingCurve(0.16, 1, 0.3, 1, duration: 3.6)) {
             rotation = newRotation
@@ -554,41 +633,44 @@ struct ContentView: View {
         return y
     }
 
-    /// Calculates current rotation based on elapsed time during spin animation
+    /// Calculates current rotation based on elapsed time during spin animation.
+    /// Uses CACurrentMediaTime() — zero-allocation monotonic clock, no heap
+    /// object created per call unlike Date().
     private func calculateAnimatedRotation() -> Double {
-        guard let startTime = spinStartTime else { return rotation }
-        
-        let elapsed = Date().timeIntervalSince(startTime)
+        guard spinStartTime >= 0 else { return rotation }
+
+        let elapsed = CACurrentMediaTime() - spinStartTime
         let duration = 3.6
-        
-        if elapsed >= duration {
-            return spinEndRotation
-        }
-        
-        let progress = elapsed / duration
-        let easedProgress = cubicBezier(t: progress)
-        let delta = spinEndRotation - spinStartRotation
-        return spinStartRotation + delta * easedProgress
+
+        if elapsed >= duration { return spinEndRotation }
+
+        let easedProgress = cubicBezier(t: elapsed / duration)
+        return spinStartRotation + (spinEndRotation - spinStartRotation) * easedProgress
     }
 
-    /// Triggers haptic feedback if haptics are enabled
+    /// Triggers haptic feedback if haptics are enabled, capped at 20 hz.
+    /// The Taptic Engine IPC channel is rate-limited at 32 hz by the system;
+    /// exceeding it floods the main thread and causes gesture gate timeouts.
     private func triggerHapticFeedback() {
         guard settings.hapticsEnabled else { return }
-        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+        let now = CACurrentMediaTime()
+        guard now - lastHapticFire >= 0.05 else { return }
+        lastHapticFire = now
         impactFeedback.impactOccurred()
     }
 
     /// Starts monitoring segment changes during wheel spin
     private func startSegmentMonitoring() {
-        spinStartTime = Date()
+        spinStartTime = CACurrentMediaTime()
         spinStartRotation = rotation
         lastSegmentIndex = getCurrentSegmentIndex(for: spinStartRotation)
-        
-        // Check every ~16ms (60 times per second, synced to screen refresh)
-        segmentCheckTimer = Timer.scheduledTimer(withTimeInterval: 0.016, repeats: true) { _ in
+
+        // 30 hz is sufficient for segment detection and keeps main-thread
+        // timer overhead well below the 32 hz Taptic Engine IPC rate limit.
+        segmentCheckTimer = Timer.scheduledTimer(withTimeInterval: 0.033, repeats: true) { _ in
             let animatedRotation = calculateAnimatedRotation()
             let currentSegment = getCurrentSegmentIndex(for: animatedRotation)
-            
+
             if currentSegment != lastSegmentIndex && currentSegment >= 0 {
                 triggerHapticFeedback()
                 lastSegmentIndex = currentSegment
@@ -600,7 +682,7 @@ struct ContentView: View {
     private func stopSegmentMonitoring() {
         segmentCheckTimer?.invalidate()
         segmentCheckTimer = nil
-        spinStartTime = nil
+        spinStartTime = -1
         lastSegmentIndex = -1
     }
 }

@@ -65,6 +65,7 @@ private struct WheelDisc: View {
             labelsLayer
         }
         .frame(width: size, height: size)
+        .drawingGroup()
     }
 
     @ViewBuilder
@@ -191,7 +192,10 @@ struct WheelView: View {
                 } else {
                     WheelDisc(options: options, size: size)
                         .rotationEffect(.degrees(rotation))
-                        .shadow(color: shadowColor, radius: 32, x: 0, y: 22)
+                        .shadow(color: isSpinning ? .clear : shadowColor,
+                                radius: isSpinning ? 0 : 32,
+                                x: 0,
+                                y: isSpinning ? 0 : 22)
                         .position(x: cx, y: cy)
                 }
 

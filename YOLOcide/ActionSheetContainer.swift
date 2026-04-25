@@ -40,16 +40,23 @@ class KeyboardHeightHelper: ObservableObject {
     }
     
     @objc func keyboardWillShow(notification: NSNotification) {
-        if let keyboardSize = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-            withAnimation {
-                self.keyboardHeight = keyboardSize.height
+        guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+        else { return }
+        let height = frame.height
+        let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double ?? 0.25
+        DispatchQueue.main.async { [weak self] in
+            withAnimation(.easeOut(duration: duration)) {
+                self?.keyboardHeight = height
             }
         }
     }
-    
+
     @objc func keyboardWillHide(notification: NSNotification) {
-        withAnimation {
-            self.keyboardHeight = 0
+        let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double ?? 0.25
+        DispatchQueue.main.async { [weak self] in
+            withAnimation(.easeIn(duration: duration)) {
+                self?.keyboardHeight = 0
+            }
         }
     }
     
