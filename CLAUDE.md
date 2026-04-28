@@ -5,8 +5,8 @@
 YOLOcide is a native iOS SwiftUI app — a decision-making roulette wheel. Users add options, spin the wheel, and let randomness decide. It supports a "rank mode" that eliminates winners one by one until all options are ranked.
 
 The repo has two top-level directories:
-- `app/` — the iOS SwiftUI app (all active code)
-- `BE/` — future Go backend (currently empty)
+- `app/` — the iOS SwiftUI app
+- `BE/` — Go backend (auth + Postgres). See [BE/README.md](BE/README.md) and [BE/ROADMAP.md](BE/ROADMAP.md).
 
 ---
 
@@ -19,7 +19,16 @@ app/
   YOLOcideTests/             ← Unit tests
   YOLOcideUITests/           ← UI tests
   YOLOcide Design System/    ← Design docs, tokens, interactive previews
-BE/                          ← Go backend (empty, planned)
+BE/                          ← Go backend
+  cmd/api/                   ← entry point (main.go)
+  internal/auth/             ← Apple + Google verification, session JWT, middleware
+  internal/config/           ← env loading
+  internal/db/               ← pgxpool + embedded migration runner
+  internal/db/migrations/    ← *.up.sql files (embedded into the binary)
+  internal/server/           ← chi router + route wiring
+  internal/user/             ← user model + Postgres repository
+  docker-compose.yml         ← local Postgres
+  Makefile                   ← run / build / test / db helpers
 ```
 
 ---
@@ -158,6 +167,52 @@ For visual design work, invoke the `/yolocide-design` skill to load the full bra
 
 ---
 
-## Planned backend
+## Backend
 
-`BE/` will hold a Go backend. The `.gitignore` already has Go patterns. When the backend is added, update this file with service layout, API contracts, and local development setup.
+The backend in `BE/` is a Go HTTP API whose only current job is authentication. See [BE/README.md](BE/README.md) for the full setup and endpoint reference, and [BE/ROADMAP.md](BE/ROADMAP.md) for the milestone plan toward wheel + spin-history sync.
+
+### Stack at a glance
+
+| Layer | Choice |
+|-------|--------|
+| Language | Go 1.23+ |
+| Router | `github.com/go-chi/chi/v5` |
+| DB | Postgres 16 via `github.com/jackc/pgx/v5` + `pgxpool` |
+| Migrations | [goose](https://github.com/pressly/goose) v3 — plain SQL in `internal/db/migrations/`, embedded with `//go:embed`, applied at startup |
+| Apple sign-in | `github.com/golang-jwt/jwt/v5` + a small JWKS cache fetching `https://appleid.apple.com/auth/keys` |
+| Google sign-in | `google.golang.org/api/idtoken.Validate` |
+| Session JWTs | HS256 via `golang-jwt/jwt/v5`, secret from `SESSION_JWT_SECRET` |
+| Logging | `log/slog` (stdlib) |
+
+### Endpoints (current)
+
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| GET | `/healthz` | — | Liveness. |
+| POST | `/auth/apple` | — | Verify Apple `identityToken`, upsert user, return session JWT. |
+| POST | `/auth/google` | — | Verify Google `idToken`, upsert user, return session JWT. |
+| GET | `/me` | Bearer | Return the authenticated user. |
+
+### Running locally
+
+```bash
+cd BE
+go mod tidy           # first time only
+cp .env.example .env  # fill in APPLE_CLIENT_ID, GOOGLE_CLIENT_IDS, SESSION_JWT_SECRET
+make db-up            # local Postgres via docker-compose
+make run              # migrations apply on startup
+```
+
+### Schema
+
+One `users` table with nullable `apple_user_id` / `google_user_id` (each unique), nullable `email` (CITEXT) and `name`, plus `created_at` / `updated_at` / `last_login_at`. A check constraint enforces at least one provider ID. Account linking (one user with both Apple and Google IDs) is a roadmap item.
+
+### Backend conventions
+
+- **No ORM.** SQL is hand-written and lives next to the repo type that uses it (`internal/user/repo.go`).
+- **No third-party logger.** Use `log/slog`.
+- **No business logic in HTTP handlers.** Handlers parse → call repo/verifier → write JSON.
+- **Errors propagate with `%w`.** The handler decides the status code.
+- **Time is `time.Time`, IDs are `uuid.UUID`.** No string-typed IDs in domain types.
+- **Migrations use goose.** Create with `make goose-create name=<thing>`. Each file has `-- +goose Up` and `-- +goose Down` sections. Inspect with `make goose-status`; roll back with `make goose-down`. Goose tracks state in `goose_db_version`.
+- **Trust only verified claims.** Fields like `email` come from the verified provider token first; client-supplied values are a fallback (Apple omits email after the first sign-in).

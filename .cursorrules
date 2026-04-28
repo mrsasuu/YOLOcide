@@ -3,7 +3,7 @@
 ## Project overview
 Native iOS SwiftUI app — a decision-making roulette wheel. Users add options, spin, and let fate decide. Supports a "rank mode" that eliminates options one-by-one.
 
-All active code is in `app/YOLOcide/`. The `BE/` directory is a planned Go backend (currently empty).
+iOS code is in `app/YOLOcide/`. The `BE/` directory is a Go HTTP API (Postgres + Apple/Google sign-in) — see `BE/README.md` and `BE/ROADMAP.md`.
 
 ## Architecture
 - **Pattern**: MVVM-adjacent. State lives in `@State` inside `ContentView` plus two `@EnvironmentObject` stores.
@@ -42,3 +42,10 @@ All active code is in `app/YOLOcide/`. The `BE/` directory is a planned Go backe
 - Check `app/YOLOcide Design System/README.md` for brand guidelines
 - Reference `app/YOLOcide Design System/ui_kits/ios_app/` for component shapes
 - Voice: playful, fatalistic, second-person. "Spin my fate" not "Spin". "Fate has spoken."
+
+## Backend (BE/)
+- Go 1.23+, chi v5, pgx v5 + pgxpool, Postgres 16. No ORM.
+- Migrations: goose v3, plain SQL in `BE/internal/db/migrations/`, embedded with `//go:embed`, applied at startup. New files via `make goose-create name=<thing>`; each file has `-- +goose Up` and `-- +goose Down` sections. Inspect/roll back with `make goose-status` / `make goose-down`.
+- Auth: `POST /auth/apple` and `POST /auth/google` verify provider ID tokens (Apple via JWKS at `https://appleid.apple.com/auth/keys`, Google via `idtoken.Validate`) and return an HS256 session JWT signed with `SESSION_JWT_SECRET`. Auth middleware reads `Authorization: Bearer <jwt>` and injects user UUID into the request context.
+- Schema: one `users` table with nullable `apple_user_id` / `google_user_id`. Account linking and wheel/history sync are roadmap milestones (`BE/ROADMAP.md`).
+- Conventions: handlers stay thin, SQL lives next to its repo type, errors wrap with `%w`, logger is `log/slog`. Trust verified claims over client-supplied fields.

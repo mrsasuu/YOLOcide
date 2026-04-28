@@ -20,7 +20,11 @@ app/                          iOS SwiftUI application
   YOLOcideTests/              Unit tests
   YOLOcideUITests/            UI tests
   YOLOcide Design System/     Design tokens, brand guide, interactive previews
-BE/                           Go backend (planned, currently empty)
+BE/                           Go backend (auth + Postgres; see BE/README.md)
+  cmd/api/                    main entry point
+  internal/                   auth, config, db, server, user packages
+  internal/db/migrations/     embedded SQL migrations
+  docker-compose.yml          local Postgres
 ```
 
 ## Getting started
@@ -31,6 +35,17 @@ BE/                           Go backend (planned, currently empty)
 
 No dependencies to install — the project uses only Swift standard libraries and SwiftUI.
 
+## Backend
+
+The Go backend lives in [BE/](BE/). It currently handles Sign in with Apple / Google and issues session JWTs against a Postgres database. See [BE/README.md](BE/README.md) for setup and [BE/ROADMAP.md](BE/ROADMAP.md) for the planned wheel + spin-history sync work.
+
+```bash
+cd BE
+cp .env.example .env   # fill in APPLE_CLIENT_ID, GOOGLE_CLIENT_IDS, SESSION_JWT_SECRET
+make db-up             # local Postgres in Docker
+make run               # applies migrations + starts API on :8080
+```
+
 ## Development
 
 See [CLAUDE.md](CLAUDE.md) for architecture notes, coding conventions, and design system rules.
@@ -39,6 +54,8 @@ The design system documentation lives at `app/YOLOcide Design System/README.md`.
 
 ## Tech stack
 
+### iOS app
+
 | Layer | Technology |
 |-------|-----------|
 | Language | Swift |
@@ -46,3 +63,14 @@ The design system documentation lives at `app/YOLOcide Design System/README.md`.
 | Persistence | UserDefaults |
 | Architecture | MVVM-adjacent (`@StateObject` / `@EnvironmentObject`) |
 | Tests | XCTest + XCUITest |
+
+### Backend
+
+| Layer | Technology |
+|-------|-----------|
+| Language | Go 1.23+ |
+| Router | chi v5 |
+| DB | Postgres 16 via pgx v5 / pgxpool |
+| Migrations | embedded SQL, applied at startup |
+| Auth in | Apple / Google ID token verification |
+| Auth out | HS256 session JWTs |
