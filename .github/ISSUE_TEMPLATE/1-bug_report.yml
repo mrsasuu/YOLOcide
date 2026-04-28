@@ -1,0 +1,115 @@
+name: Bug report
+description: Something isn't working as expected
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. The more detail you provide, the faster we can reproduce and fix it.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: A clear, concise description of the bug.
+      placeholder: Describe the bug…
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Walk us through exactly how to trigger the bug.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: visual_evidence
+    attributes:
+      label: Visual evidence
+      description: |
+        Screenshots, screen recordings, or GIFs that show the bug. Drag and drop files directly into this field.
+
+        **Tip:** For animations or transition bugs, a screen recording is much more helpful than a screenshot.
+      placeholder: Drag and drop screenshots or recordings here…
+
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      placeholder: "e.g. iPhone 15 Pro"
+    validations:
+      required: true
+
+  - type: input
+    id: ios_version
+    attributes:
+      label: iOS version
+      placeholder: "e.g. 17.4"
+    validations:
+      required: true
+
+  - type: input
+    id: app_version
+    attributes:
+      label: App version
+      placeholder: "e.g. 1.0.0"
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: App language
+      options:
+        - English
+        - Spanish
+
+  - type: dropdown
+    id: appearance
+    attributes:
+      label: Appearance setting
+      options:
+        - System
+        - Light
+        - Dark
+
+  - type: checkboxes
+    id: rank_mode
+    attributes:
+      label: Mode
+      options:
+        - label: Bug occurs in Rank mode ("Rank 'em all")
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or error output
+      description: Paste any relevant Xcode console output or crash logs here.
+      render: shell
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else that might help — how many options were on the wheel, what triggered it, a workaround you found, etc.

@@ -1,0 +1,44 @@
+# YOLOcide — Cursor Rules
+
+## Project overview
+Native iOS SwiftUI app — a decision-making roulette wheel. Users add options, spin, and let fate decide. Supports a "rank mode" that eliminates options one-by-one.
+
+All active code is in `app/YOLOcide/`. The `BE/` directory is a planned Go backend (currently empty).
+
+## Architecture
+- **Pattern**: MVVM-adjacent. State lives in `@State` inside `ContentView` plus two `@EnvironmentObject` stores.
+- **Stores**: `HistoryStore` (session history) and `SettingsStore` (language, appearance, haptics) — both `ObservableObject`, injected at root in `YOLOcideApp.swift`.
+- **No third-party dependencies** — pure SwiftUI + Foundation.
+- **Persistence**: `UserDefaults` only. Keys are prefixed `yolocide_`. No CoreData, SwiftData, or databases.
+- **Localization**: `SettingsStore.t("key")` — NOT `Localizable.strings`. Add new strings to both `en` and `es` dictionaries in `SettingsStore.swift`.
+
+## Key files
+- `ContentView.swift` — main screen, all wheel state and spin logic
+- `Models.swift` — `WheelOption` (live, has `Color`), `SessionOption` (Codable, stores `colorHex`), `SpinSession`
+- `DesignSystem.swift` — color tokens (`ycBg`, `ycSurface`, `ycPurple`, `wheelPastels`), `PrimaryButton`, `ScaleButtonStyle`
+- `SettingsStore.swift` — settings + all localized strings
+- `HistoryStore.swift` — add/remove/clear sessions
+- `WheelView.swift` — wheel rendering with Canvas
+
+## Design rules
+- **Accent**: `Color.ycPurple` (`#6c5ce7`) — CTAs only. No gradients, no secondary accents.
+- **Backgrounds**: `Color.ycBg` (app bg), `Color.ycSurface` (cards/sheets) — both adaptive light/dark.
+- **Wheel colors**: `Color.wheelPastels` (20 pastel colors). Max 20 options — hard constraint.
+- **Motion**: spring everywhere. Press = `ScaleButtonStyle` (scale 0.97). No flat fades.
+- **Buttons**: always wrap with `ScaleButtonStyle` or use `PrimaryButton`. Never raw `Button` without a style.
+- **Icons**: Lucide, round stroke, 1.75px weight.
+- **Haptics**: always gate behind `settings.hapticsEnabled`.
+
+## Code style
+- Swift API Design Guidelines: `camelCase` variables/functions, `PascalCase` types
+- Extract sub-views when `body` grows long or a component is reused
+- No comments for obvious code — only for non-obvious constraints or workarounds
+- Never add `.Localizable.strings` — use `SettingsStore.t()`
+- Never add new `UIColor` conversion utilities — use `Color(hex:)` / `.hexString` from `DesignSystem.swift`
+- Never break the `WheelOption` / `SessionOption` split (`Color` is not `Codable`)
+- Never edit `.xcodeproj` by hand
+
+## When modifying the UI
+- Check `app/YOLOcide Design System/README.md` for brand guidelines
+- Reference `app/YOLOcide Design System/ui_kits/ios_app/` for component shapes
+- Voice: playful, fatalistic, second-person. "Spin my fate" not "Spin". "Fate has spoken."
