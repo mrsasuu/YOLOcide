@@ -93,7 +93,21 @@ final class BackendClient {
         try await post("/auth/google", body: GoogleSignInBody(idToken: idToken))
     }
 
+    func me(token: String) async throws -> BackendUser {
+        try await get("/me", token: token)
+    }
+
     // MARK: - Internals
+
+    private func get<R: Decodable>(_ path: String, token: String) async throws -> R {
+        var req = URLRequest(url: baseURL.appending(path: path))
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (data, response) = try await session.data(for: req)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw BackendError.from(data: data, response: response)
+        }
+        return try decoder.decode(R.self, from: data)
+    }
 
     private func post<B: Encodable, R: Decodable>(_ path: String, body: B) async throws -> R {
         var req = URLRequest(url: baseURL.appending(path: path))

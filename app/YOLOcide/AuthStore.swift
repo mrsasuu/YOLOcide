@@ -18,7 +18,7 @@ final class AuthStore: ObservableObject {
     init() {
         guard keychain.read(key: Self.sessionKey) != nil else { return }
         isSignedIn = true
-        // Restore cached display info so the account card shows without a network call.
+        // Show cached display info immediately, then refresh from the backend.
         let name  = UserDefaults.standard.string(forKey: Self.displayNameKey)
         let email = UserDefaults.standard.string(forKey: Self.displayEmailKey)
         if name != nil || email != nil {
@@ -28,6 +28,7 @@ final class AuthStore: ObservableObject {
                 createdAt: Date(), updatedAt: Date(), lastLoginAt: nil
             )
         }
+        Task { await refreshCurrentUser() }
     }
 
     // MARK: - Apple
@@ -103,6 +104,25 @@ final class AuthStore: ObservableObject {
 
     // MARK: - Internals
 
+    func refreshCurrentUser() async {
+        guard let token = sessionToken else { return }
+        do {
+            let user = try await client.me(token: token)
+            currentUser = user
+            if let name = user.name {
+                UserDefaults.standard.set(name, forKey: Self.displayNameKey)
+            }
+            if let email = user.email {
+                UserDefaults.standard.set(email, forKey: Self.displayEmailKey)
+            }
+        } catch let err as BackendError {
+            if case .httpError(401, _) = err { signOut() }
+            // Other errors (offline, server down): keep showing cached data.
+        } catch {
+            // Network errors: silently ignore.
+        }
+    }
+
     private func persist(response: SessionResponse) {
         keychain.save(key: Self.sessionKey, value: response.token)
         if let name = response.user.name {
@@ -113,6 +133,7 @@ final class AuthStore: ObservableObject {
         }
         currentUser = response.user
         isSignedIn = true
+        Task { await refreshCurrentUser() }
     }
 }
 
