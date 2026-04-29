@@ -85,6 +85,14 @@ final class BackendClient {
         try await post("/auth/apple", body: AppleSignInBody(identityToken: identityToken, email: email, name: name))
     }
 
+    private struct GoogleSignInBody: Encodable {
+        let idToken: String
+    }
+
+    func signInWithGoogle(idToken: String) async throws -> SessionResponse {
+        try await post("/auth/google", body: GoogleSignInBody(idToken: idToken))
+    }
+
     // MARK: - Internals
 
     private func post<B: Encodable, R: Decodable>(_ path: String, body: B) async throws -> R {

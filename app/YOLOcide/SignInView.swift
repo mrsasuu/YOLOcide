@@ -130,10 +130,12 @@ struct SignInView: View {
         .padding(.horizontal, 20)
     }
 
-    // MARK: - Google button (stub — wired in a future milestone)
+    // MARK: - Google button
 
     private var googleButton: some View {
-        Button {} label: {
+        Button {
+            Task { await authStore.signInWithGoogle() }
+        } label: {
             HStack(spacing: 10) {
                 Text("G")
                     .font(.system(size: 16, weight: .bold))
@@ -160,7 +162,7 @@ struct SignInView: View {
             )
         }
         .buttonStyle(ScaleButtonStyle())
-        .disabled(true)
-        .opacity(0.5)
+        .disabled(authStore.isLoading)
+        .opacity(authStore.isLoading ? 0.6 : 1)
     }
 }

@@ -65,6 +65,25 @@ final class AuthStore: ObservableObject {
         }
     }
 
+    // MARK: - Google
+
+    func signInWithGoogle() async {
+        isLoading = true
+        error = nil
+        defer { isLoading = false }
+
+        do {
+            let idToken = try await GoogleSignInHandler.shared.signIn()
+            let response = try await client.signInWithGoogle(idToken: idToken)
+            persist(response: response)
+        } catch let err as GoogleSignInError {
+            if case .cancelled = err { return }
+            self.error = err.localizedDescription
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+
     // MARK: - Sign out
 
     func signOut() {
