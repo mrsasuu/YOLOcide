@@ -15,6 +15,7 @@ import (
 	"github.com/yolocide/yolocide-be/internal/config"
 	"github.com/yolocide/yolocide-be/internal/db"
 	"github.com/yolocide/yolocide-be/internal/server"
+	"github.com/yolocide/yolocide-be/internal/session"
 	"github.com/yolocide/yolocide-be/internal/user"
 )
 
@@ -54,10 +55,13 @@ func main() {
 	users := user.NewRepo(pool)
 	apple := auth.NewAppleVerifier(cfg.AppleClientID)
 	google := auth.NewGoogleVerifier(cfg.GoogleClientIDs)
-	session := auth.NewSessionIssuer(cfg.SessionSecret, cfg.SessionTTL)
-	authH := auth.NewHandler(apple, google, session, users)
+	sessionIssuer := auth.NewSessionIssuer(cfg.SessionSecret, cfg.SessionTTL)
+	authH := auth.NewHandler(apple, google, sessionIssuer, users)
 
-	handler := server.New(server.Deps{Auth: authH, Session: session})
+	sessions := session.NewRepo(pool)
+	sessionsH := session.NewHandler(sessions)
+
+	handler := server.New(server.Deps{Auth: authH, Session: sessionIssuer, Sessions: sessionsH})
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,

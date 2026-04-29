@@ -9,11 +9,13 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/yolocide/yolocide-be/internal/auth"
+	"github.com/yolocide/yolocide-be/internal/session"
 )
 
 type Deps struct {
-	Auth    *auth.Handler
-	Session *auth.SessionIssuer
+	Auth     *auth.Handler
+	Session  *auth.SessionIssuer
+	Sessions *session.Handler
 }
 
 func New(deps Deps) http.Handler {
@@ -39,6 +41,7 @@ func New(deps Deps) http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(auth.Middleware(deps.Session))
 		r.Get("/me", deps.Auth.HandleMe)
+		r.Post("/sessions", deps.Sessions.HandleCreate)
 	})
 
 	return r
