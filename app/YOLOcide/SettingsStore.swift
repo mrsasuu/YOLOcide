@@ -112,6 +112,8 @@ final class SettingsStore: ObservableObject {
         "signin.subtitle":                 "Sign in to save your wheels and rankings across devices.",
         "signin.google":                   "Continue with Google",
         "signin.later":                    "Maybe later",
+        "signin.signedin":                 "Signed in",
+        "signin.signout":                  "Sign out",
     ]
 
     // MARK: - Spanish
@@ -167,5 +169,7 @@ final class SettingsStore: ObservableObject {
         "signin.subtitle":                 "Inicia sesión para guardar tus ruletas y rankings en todos tus dispositivos.",
         "signin.google":                   "Continuar con Google",
         "signin.later":                    "Quizás después",
+        "signin.signedin":                 "Sesión iniciada",
+        "signin.signout":                  "Cerrar sesión",
     ]
 }

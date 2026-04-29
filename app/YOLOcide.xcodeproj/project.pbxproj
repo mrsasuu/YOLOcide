@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8EE56F3C2FA20B7000BACB1F /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8EE56F3B2FA20B7000BACB1F /* Release.xcconfig */; };
+		8EE56F3E2FA20B7900BACB1F /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8EE56F3D2FA20B7900BACB1F /* Debug.xcconfig */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		8E8738292F94076C0071F06A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,11 +32,26 @@
 		8E8738172F94076A0071F06A /* YOLOcide.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YOLOcide.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E8738282F94076C0071F06A /* YOLOcideTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YOLOcideTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E8738322F94076C0071F06A /* YOLOcideUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YOLOcideUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8EE56F3B2FA20B7000BACB1F /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		8EE56F3D2FA20B7900BACB1F /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		8EE56F402FA20BF200BACB1F /* Exceptions for "YOLOcide" folder in "YOLOcide" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 8E8738162F94076A0071F06A /* YOLOcide */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8E8738192F94076A0071F06A /* YOLOcide */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8EE56F402FA20BF200BACB1F /* Exceptions for "YOLOcide" folder in "YOLOcide" target */,
+			);
 			path = YOLOcide;
 			sourceTree = "<group>";
 		};
@@ -79,6 +99,8 @@
 				8E87382B2F94076C0071F06A /* YOLOcideTests */,
 				8E8738352F94076C0071F06A /* YOLOcideUITests */,
 				8E8738182F94076A0071F06A /* Products */,
+				8EE56F3B2FA20B7000BACB1F /* Release.xcconfig */,
+				8EE56F3D2FA20B7900BACB1F /* Debug.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -212,6 +234,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EE56F3E2FA20B7900BACB1F /* Debug.xcconfig in Resources */,
+				8EE56F3C2FA20B7000BACB1F /* Release.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -385,6 +409,7 @@
 		};
 		8E87383D2F94076C0071F06A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8EE56F3D2FA20B7900BACB1F /* Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -399,6 +424,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = YOLOcide/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -428,6 +454,7 @@
 		};
 		8E87383E2F94076C0071F06A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8EE56F3B2FA20B7000BACB1F /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -442,6 +469,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = YOLOcide/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

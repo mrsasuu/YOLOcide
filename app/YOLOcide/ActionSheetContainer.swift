@@ -68,7 +68,7 @@ class KeyboardHeightHelper: ObservableObject {
 // MARK: - Reusable Action Sheet Container
 struct ActionSheetContainer<Content: View>: View {
     let onClose: () -> Void
-    let content: () -> Content
+    @ViewBuilder let content: () -> Content
     
     @StateObject private var keyboardHelper = KeyboardHeightHelper()
     @State private var dragOffset: CGFloat = 0

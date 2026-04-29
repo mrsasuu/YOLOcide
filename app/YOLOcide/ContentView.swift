@@ -4,6 +4,7 @@ import UIKit
 struct ContentView: View {
     @EnvironmentObject private var historyStore: HistoryStore
     @EnvironmentObject private var settings: SettingsStore
+    @EnvironmentObject private var authStore: AuthStore
 
     @State private var options: [WheelOption] = {
         guard let data = UserDefaults.standard.data(forKey: "yolocide_options_v1"),
@@ -130,6 +131,7 @@ struct ContentView: View {
                     }
                 }
                 .environmentObject(settings)
+                .environmentObject(authStore)
                 .zIndex(25)
                 .transition(.opacity)
             }
@@ -207,13 +209,17 @@ struct ContentView: View {
             .buttonStyle(ScaleButtonStyle())
             .padding(.trailing, 8)
 
-            // Sign in button
+            // Sign in / account button
             Button {
                 withAnimation(.spring(response: 0.34, dampingFraction: 0.8)) {
                     showSignIn = true
                 }
             } label: {
-                headerIcon("person.crop.circle", size: 20)
+                headerIcon(
+                    authStore.isSignedIn ? "person.crop.circle.fill" : "person.crop.circle",
+                    size: 20,
+                    color: authStore.isSignedIn ? Color.ycPurple : Color(.label)
+                )
             }
             .buttonStyle(ScaleButtonStyle())
         }
@@ -222,10 +228,10 @@ struct ContentView: View {
         .padding(.bottom, 6)
     }
 
-    private func headerIcon(_ name: String, size: CGFloat) -> some View {
+    private func headerIcon(_ name: String, size: CGFloat, color: Color = Color(.label)) -> some View {
         Image(systemName: name)
             .font(.system(size: size, weight: .medium))
-            .foregroundStyle(Color(.label))
+            .foregroundStyle(color)
             .frame(width: 44, height: 44)
             .background(
                 Circle()
