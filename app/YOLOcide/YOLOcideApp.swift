@@ -13,6 +13,7 @@ struct YOLOcideApp: App {
                 .environmentObject(settings)
                 .environmentObject(authStore)
                 .preferredColorScheme(settings.appearance.colorScheme)
+                .onAppear { authStore.configure(historyStore: historyStore) }
         }
     }
 }

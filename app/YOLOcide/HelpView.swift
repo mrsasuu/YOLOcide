@@ -27,6 +27,11 @@ struct HelpView: View {
                             title: settings.t("help.section.options"),
                             body: settings.t("help.options.body")
                         )
+                        helpCard(
+                            icon: "icloud.and.arrow.up",
+                            title: settings.t("help.section.signin"),
+                            body: settings.t("help.signin.body")
+                        )
                         settingsCard
                     }
                     .padding(.horizontal, 20)
@@ -161,35 +166,13 @@ struct HelpView: View {
     // MARK: - Language picker
 
     private var languagePicker: some View {
-        HStack(spacing: 2) {
+        Picker("", selection: $settings.language) {
             ForEach(AppLanguage.allCases, id: \.self) { lang in
-                Button {
-                    withAnimation(.spring(response: 0.26, dampingFraction: 0.72)) {
-                        settings.language = lang
-                    }
-                } label: {
-                    Text(lang.displayName)
-                        .font(.system(size: 13,
-                                      weight: settings.language == lang ? .semibold : .regular))
-                        .foregroundStyle(settings.language == lang ? .white : Color(.secondaryLabel))
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(
-                            Capsule().fill(settings.language == lang
-                                ? Color.ycPurple
-                                : Color.clear)
-                        )
-                }
-                .buttonStyle(ScaleButtonStyle())
-                .animation(.spring(response: 0.26, dampingFraction: 0.72), value: settings.language)
+                Text(lang.displayName).tag(lang)
             }
         }
-        .padding(3)
-        .background(
-            Capsule().fill(scheme == .dark
-                ? Color.white.opacity(0.10)
-                : Color.black.opacity(0.07))
-        )
+        .pickerStyle(.menu)
+        .tint(Color.ycPurple)
     }
 
     // MARK: - Appearance picker

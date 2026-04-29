@@ -52,11 +52,16 @@ final class BackendClient {
 
     private let session: URLSession
     private let decoder: JSONDecoder
+    private let encoder: JSONEncoder
 
     init() {
         let cfg = URLSessionConfiguration.default
         cfg.timeoutIntervalForRequest = 30
         session = URLSession(configuration: cfg)
+
+        let e = JSONEncoder()
+        e.dateEncodingStrategy = .iso8601
+        encoder = e
 
         // Backend emits camelCase JSON + ISO 8601 dates (with optional fractional seconds).
         let d = JSONDecoder()
@@ -97,6 +102,32 @@ final class BackendClient {
         try await get("/me", token: token)
     }
 
+    func syncSession(_ spinSession: SpinSession, token: String) async throws {
+        struct Option: Encodable { let name: String; let colorHex: String }
+        struct Result: Encodable { let name: String; let colorHex: String; let rank: Int }
+        struct Body: Encodable {
+            let spunAt: Date
+            let isRanked: Bool
+            let wheelOptions: [Option]
+            let results: [Result]
+        }
+        let body = Body(
+            spunAt: spinSession.timestamp,
+            isRanked: spinSession.isRankSession,
+            wheelOptions: spinSession.wheelOptions.map { Option(name: $0.name, colorHex: $0.colorHex) },
+            results: spinSession.winners.enumerated().map { Result(name: $0.element.name, colorHex: $0.element.colorHex, rank: $0.offset + 1) }
+        )
+        var req = URLRequest(url: baseURL.appending(path: "/sessions"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.httpBody = try encoder.encode(body)
+        let (data, response) = try await session.data(for: req)
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw BackendError.from(data: data, response: response)
+        }
+    }
+
     // MARK: - Internals
 
     private func get<R: Decodable>(_ path: String, token: String) async throws -> R {
@@ -113,7 +144,7 @@ final class BackendClient {
         var req = URLRequest(url: baseURL.appending(path: path))
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.httpBody = try JSONEncoder().encode(body)
+        req.httpBody = try encoder.encode(body)
 
         let (data, response) = try await session.data(for: req)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {

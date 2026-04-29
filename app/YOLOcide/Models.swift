@@ -32,6 +32,7 @@ struct SpinSession: Identifiable, Codable {
     var winners: [SessionOption]
     var wheelOptions: [SessionOption]
     var isRankSession: Bool
+    var isSynced: Bool = false
 }
 
 extension WheelOption {

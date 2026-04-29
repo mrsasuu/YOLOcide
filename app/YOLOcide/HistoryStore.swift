@@ -12,6 +12,12 @@ final class HistoryStore: ObservableObject {
         save()
     }
 
+    func markSynced(id: UUID) {
+        guard let idx = sessions.firstIndex(where: { $0.id == id }) else { return }
+        sessions[idx].isSynced = true
+        save()
+    }
+
     func remove(at offsets: IndexSet) {
         sessions.remove(atOffsets: offsets)
         save()

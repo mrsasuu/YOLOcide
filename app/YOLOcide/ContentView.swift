@@ -542,12 +542,14 @@ struct ContentView: View {
             if options.count < 2 {
                 let allWinners = winners
                 let baseOptions = rankSessionBaseOptions
-                historyStore.add(SpinSession(
+                let completedRank = SpinSession(
                     timestamp: Date(),
                     winners: allWinners.map { $0.asSessionOption },
                     wheelOptions: baseOptions.map { $0.asSessionOption },
                     isRankSession: true
-                ))
+                )
+                historyStore.add(completedRank)
+                authStore.syncSession(completedRank)
                 rankSessionBaseOptions = []
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                     withAnimation(.spring(response: 0.42, dampingFraction: 0.7)) {
@@ -557,12 +559,14 @@ struct ContentView: View {
             }
         } else {
             // Record normal (single-winner) session
-            historyStore.add(SpinSession(
+            let singleSpin = SpinSession(
                 timestamp: Date(),
                 winners: [winner.asSessionOption],
                 wheelOptions: lastSpinOptions.map { $0.asSessionOption },
                 isRankSession: false
-            ))
+            )
+            historyStore.add(singleSpin)
+            authStore.syncSession(singleSpin)
             withAnimation(.easeOut(duration: 0.22)) { result = nil }
         }
     }
@@ -583,12 +587,14 @@ struct ContentView: View {
 
     private func savePartialRankSession() {
         guard !winners.isEmpty, !rankSessionBaseOptions.isEmpty else { return }
-        historyStore.add(SpinSession(
+        let partialRank = SpinSession(
             timestamp: Date(),
             winners: winners.map { $0.asSessionOption },
             wheelOptions: rankSessionBaseOptions.map { $0.asSessionOption },
             isRankSession: true
-        ))
+        )
+        historyStore.add(partialRank)
+        authStore.syncSession(partialRank)
     }
 
     // MARK: - Add option

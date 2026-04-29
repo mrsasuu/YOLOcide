@@ -137,6 +137,7 @@ private struct SessionCard: View {
 
     @State private var expanded = false
     @EnvironmentObject private var settings: SettingsStore
+    @EnvironmentObject private var authStore: AuthStore
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
@@ -185,6 +186,20 @@ private struct SessionCard: View {
                     .padding(.vertical, 4)
                     .background(Capsule().fill(Color.ycPurple.opacity(0.12)))
             }
+            cloudIcon
+        }
+    }
+
+    @ViewBuilder
+    private var cloudIcon: some View {
+        if session.isSynced {
+            Image(systemName: "checkmark.icloud")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color.ycPurple.opacity(0.6))
+        } else if authStore.isSignedIn {
+            Image(systemName: "icloud.and.arrow.up")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color(.tertiaryLabel))
         }
     }
 

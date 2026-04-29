@@ -1,5 +1,6 @@
 import AuthenticationServices
 import Foundation
+import Network
 
 @MainActor
 final class AuthStore: ObservableObject {
@@ -15,6 +16,11 @@ final class AuthStore: ObservableObject {
     private static let displayNameKey = "yolocide_user_display_name"
     private static let displayEmailKey = "yolocide_user_display_email"
 
+    private weak var historyStore: HistoryStore?
+    private var networkMonitor: NWPathMonitor?
+    private let monitorQueue = DispatchQueue(label: "com.yolocide.network")
+    private var isSyncing = false
+
     init() {
         guard keychain.read(key: Self.sessionKey) != nil else { return }
         isSignedIn = true
@@ -29,6 +35,21 @@ final class AuthStore: ObservableObject {
             )
         }
         Task { await refreshCurrentUser() }
+    }
+
+    // MARK: - Store wiring
+
+    /// Called once from YOLOcideApp after both stores are initialised.
+    func configure(historyStore: HistoryStore) {
+        self.historyStore = historyStore
+        guard networkMonitor == nil else { return }
+        let monitor = NWPathMonitor()
+        monitor.pathUpdateHandler = { [weak self] path in
+            guard path.status == .satisfied else { return }
+            Task { @MainActor [weak self] in await self?.syncPending() }
+        }
+        monitor.start(queue: monitorQueue)
+        networkMonitor = monitor
     }
 
     // MARK: - Apple
@@ -85,6 +106,36 @@ final class AuthStore: ObservableObject {
         }
     }
 
+    // MARK: - Session sync
+
+    func syncSession(_ spinSession: SpinSession) {
+        guard let token = sessionToken else { return }
+        Task {
+            do {
+                try await client.syncSession(spinSession, token: token)
+                historyStore?.markSynced(id: spinSession.id)
+            } catch {
+                // Will be retried by syncPending() on next network restore.
+            }
+        }
+    }
+
+    func syncPending() async {
+        guard !isSyncing, let token = sessionToken, let historyStore else { return }
+        let pending = historyStore.sessions.filter { !$0.isSynced }
+        guard !pending.isEmpty else { return }
+        isSyncing = true
+        defer { isSyncing = false }
+        for spinSession in pending {
+            do {
+                try await client.syncSession(spinSession, token: token)
+                historyStore.markSynced(id: spinSession.id)
+            } catch {
+                break // first failure likely means offline; stop and wait for next restore
+            }
+        }
+    }
+
     // MARK: - Sign out
 
     func signOut() {
@@ -96,7 +147,7 @@ final class AuthStore: ObservableObject {
         error = nil
     }
 
-    // MARK: - Token access (for future authenticated requests)
+    // MARK: - Token access
 
     var sessionToken: String? {
         keychain.read(key: Self.sessionKey)
@@ -117,9 +168,8 @@ final class AuthStore: ObservableObject {
             }
         } catch let err as BackendError {
             if case .httpError(401, _) = err { signOut() }
-            // Other errors (offline, server down): keep showing cached data.
         } catch {
-            // Network errors: silently ignore.
+            // Network errors: keep showing cached data.
         }
     }
 
@@ -134,6 +184,7 @@ final class AuthStore: ObservableObject {
         currentUser = response.user
         isSignedIn = true
         Task { await refreshCurrentUser() }
+        Task { await syncPending() }
     }
 }
 
