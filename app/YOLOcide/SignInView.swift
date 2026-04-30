@@ -7,6 +7,8 @@ struct SignInView: View {
     @EnvironmentObject private var authStore: AuthStore
     @Environment(\.colorScheme) private var scheme
 
+    @State private var showDeleteConfirm = false
+
     var body: some View {
         ActionSheetContainer(onClose: onClose) {
             if authStore.isSignedIn {
@@ -14,6 +16,17 @@ struct SignInView: View {
             } else {
                 signInContent
             }
+        }
+        .alert(settings.t("signin.deleteaccount.title"), isPresented: $showDeleteConfirm) {
+            Button(settings.t("signin.deleteaccount"), role: .destructive) {
+                Task {
+                    await authStore.deleteAccount()
+                    onClose()
+                }
+            }
+            Button(settings.t("signin.deleteaccount.cancel"), role: .cancel) {}
+        } message: {
+            Text(settings.t("signin.deleteaccount.message"))
         }
     }
 
@@ -124,6 +137,19 @@ struct SignInView: View {
                 authStore.signOut()
                 onClose()
             }
+            .padding(.bottom, 12)
+
+            Button {
+                showDeleteConfirm = true
+            } label: {
+                Text(settings.t("signin.deleteaccount"))
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color(.systemRed))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+            }
+            .buttonStyle(ScaleButtonStyle())
+            .disabled(authStore.isLoading)
             .padding(.bottom, 34)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

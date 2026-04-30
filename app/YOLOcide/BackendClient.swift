@@ -140,6 +140,16 @@ final class BackendClient {
         try await get("/sessions", token: token)
     }
 
+    func deleteAccount(token: String) async throws {
+        var req = URLRequest(url: baseURL.appending(path: "/me"))
+        req.httpMethod = "DELETE"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (data, response) = try await session.data(for: req)
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw BackendError.from(data: data, response: response)
+        }
+    }
+
     func syncSession(_ spinSession: SpinSession, token: String) async throws {
         struct Option: Encodable { let name: String; let colorHex: String }
         struct Result: Encodable { let name: String; let colorHex: String; let rank: Int }

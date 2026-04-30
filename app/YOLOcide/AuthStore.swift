@@ -139,6 +139,29 @@ final class AuthStore: ObservableObject {
         }
     }
 
+    // MARK: - Account deletion
+
+    func deleteAccount() async {
+        guard let token = sessionToken else { return }
+        isLoading = true
+        error = nil
+        defer { isLoading = false }
+        do {
+            try await client.deleteAccount(token: token)
+        } catch let err as BackendError {
+            // 404 means the account was already deleted — proceed with local cleanup.
+            if case .httpError(let status, _) = err, status != 404 {
+                self.error = err.localizedDescription
+                return
+            }
+        } catch {
+            self.error = error.localizedDescription
+            return
+        }
+        historyStore?.clearAll()
+        signOut()
+    }
+
     // MARK: - Sign out
 
     func signOut() {

@@ -135,6 +135,10 @@ final class SettingsStore: ObservableObject {
         "signin.later":                    "Maybe later",
         "signin.signedin":                 "Signed in",
         "signin.signout":                  "Sign out",
+        "signin.deleteaccount":            "Delete Account",
+        "signin.deleteaccount.title":      "Delete Account?",
+        "signin.deleteaccount.message":    "This will permanently delete your account and all your data. This cannot be undone.",
+        "signin.deleteaccount.cancel":     "Cancel",
     ]
 
     // MARK: - Spanish
@@ -194,6 +198,10 @@ final class SettingsStore: ObservableObject {
         "signin.later":                    "Quizás después",
         "signin.signedin":                 "Sesión iniciada",
         "signin.signout":                  "Cerrar sesión",
+        "signin.deleteaccount":            "Eliminar cuenta",
+        "signin.deleteaccount.title":      "¿Eliminar cuenta?",
+        "signin.deleteaccount.message":    "Se eliminará permanentemente tu cuenta y todos tus datos. Esta acción no se puede deshacer.",
+        "signin.deleteaccount.cancel":     "Cancelar",
     ]
 
     // MARK: - French
@@ -253,6 +261,10 @@ final class SettingsStore: ObservableObject {
         "signin.later":                    "Peut-être plus tard",
         "signin.signedin":                 "Connecté",
         "signin.signout":                  "Se déconnecter",
+        "signin.deleteaccount":            "Supprimer le compte",
+        "signin.deleteaccount.title":      "Supprimer le compte ?",
+        "signin.deleteaccount.message":    "Cela supprimera définitivement votre compte et toutes vos données. Cette action est irréversible.",
+        "signin.deleteaccount.cancel":     "Annuler",
     ]
 
     // MARK: - Portuguese
@@ -312,6 +324,10 @@ final class SettingsStore: ObservableObject {
         "signin.later":                    "Talvez mais tarde",
         "signin.signedin":                 "Conectado",
         "signin.signout":                  "Sair",
+        "signin.deleteaccount":            "Excluir conta",
+        "signin.deleteaccount.title":      "Excluir conta?",
+        "signin.deleteaccount.message":    "Isso excluirá permanentemente sua conta e todos os seus dados. Esta ação não pode ser desfeita.",
+        "signin.deleteaccount.cancel":     "Cancelar",
     ]
 
     // MARK: - German
@@ -371,6 +387,10 @@ final class SettingsStore: ObservableObject {
         "signin.later":                    "Vielleicht später",
         "signin.signedin":                 "Angemeldet",
         "signin.signout":                  "Abmelden",
+        "signin.deleteaccount":            "Konto löschen",
+        "signin.deleteaccount.title":      "Konto löschen?",
+        "signin.deleteaccount.message":    "Dein Konto und alle deine Daten werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+        "signin.deleteaccount.cancel":     "Abbrechen",
     ]
 
     // MARK: - Italian
@@ -430,6 +450,10 @@ final class SettingsStore: ObservableObject {
         "signin.later":                    "Forse più tardi",
         "signin.signedin":                 "Accesso eseguito",
         "signin.signout":                  "Disconnetti",
+        "signin.deleteaccount":            "Elimina account",
+        "signin.deleteaccount.title":      "Eliminare l'account?",
+        "signin.deleteaccount.message":    "Il tuo account e tutti i tuoi dati verranno eliminati definitivamente. Questa azione non può essere annullata.",
+        "signin.deleteaccount.cancel":     "Annulla",
     ]
 
     // MARK: - Polish
@@ -489,5 +513,9 @@ final class SettingsStore: ObservableObject {
         "signin.later":                    "Może później",
         "signin.signedin":                 "Zalogowano",
         "signin.signout":                  "Wyloguj",
+        "signin.deleteaccount":            "Usuń konto",
+        "signin.deleteaccount.title":      "Usunąć konto?",
+        "signin.deleteaccount.message":    "Spowoduje to trwałe usunięcie Twojego konta i wszystkich danych. Tej operacji nie można cofnąć.",
+        "signin.deleteaccount.cancel":     "Anuluj",
     ]
 }

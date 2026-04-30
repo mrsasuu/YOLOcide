@@ -142,6 +142,26 @@ func (h *Handler) HandleMe(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, u)
 }
 
+// HandleDeleteAccount permanently deletes the authenticated user and all their data.
+// Requires the auth middleware.
+func (h *Handler) HandleDeleteAccount(w http.ResponseWriter, r *http.Request) {
+	uid, ok := UserIDFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized", "missing session")
+		return
+	}
+	if err := h.users.Delete(r.Context(), uid); err != nil {
+		if errors.Is(err, user.ErrNotFound) {
+			// Already gone — treat as success so the client can still clean up.
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "delete_failed", err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func writeJSON(w http.ResponseWriter, status int, body any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
