@@ -28,6 +28,18 @@ final class HistoryStore: ObservableObject {
         save()
     }
 
+    /// Merges sessions fetched from the backend into the local store.
+    /// Remote sessions (already synced) replace local synced sessions.
+    /// Local unsynced sessions are preserved unless their timestamp matches a remote one.
+    func merge(remote: [SpinSession]) {
+        let pending = sessions.filter { !$0.isSynced }
+        let trulyPending = pending.filter { local in
+            !remote.contains { abs($0.timestamp.timeIntervalSince(local.timestamp)) < 2 }
+        }
+        sessions = (remote + trulyPending).sorted { $0.timestamp > $1.timestamp }
+        save()
+    }
+
     private func save() {
         guard let data = try? JSONEncoder().encode(sessions) else { return }
         UserDefaults.standard.set(data, forKey: storageKey)

@@ -50,6 +50,9 @@ final class AuthStore: ObservableObject {
         }
         monitor.start(queue: monitorQueue)
         networkMonitor = monitor
+        if isSignedIn {
+            Task { await fetchAndMergeHistory() }
+        }
     }
 
     // MARK: - Apple
@@ -184,7 +187,18 @@ final class AuthStore: ObservableObject {
         currentUser = response.user
         isSignedIn = true
         Task { await refreshCurrentUser() }
+        Task { await fetchAndMergeHistory() }
         Task { await syncPending() }
+    }
+
+    func fetchAndMergeHistory() async {
+        guard let token = sessionToken, let historyStore else { return }
+        do {
+            let remote = try await client.fetchSessions(token: token)
+            historyStore.merge(remote: remote.map { $0.toSpinSession() })
+        } catch {
+            // Non-fatal: local history is still shown if fetch fails.
+        }
     }
 }
 

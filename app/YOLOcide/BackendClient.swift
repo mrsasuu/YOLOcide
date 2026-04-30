@@ -2,6 +2,36 @@ import Foundation
 
 // MARK: - Response models
 
+struct RemoteOption: Codable {
+    let name: String
+    let colorHex: String
+}
+
+struct RemoteResult: Codable {
+    let name: String
+    let colorHex: String
+    let rank: Int
+}
+
+struct RemoteSpinSession: Codable {
+    let id: String
+    let spunAt: Date
+    let isRanked: Bool
+    let wheelOptions: [RemoteOption]
+    let results: [RemoteResult]
+
+    func toSpinSession() -> SpinSession {
+        SpinSession(
+            id: UUID(uuidString: id) ?? UUID(),
+            timestamp: spunAt,
+            winners: results.sorted { $0.rank < $1.rank }.map { SessionOption(name: $0.name, colorHex: $0.colorHex) },
+            wheelOptions: wheelOptions.map { SessionOption(name: $0.name, colorHex: $0.colorHex) },
+            isRankSession: isRanked,
+            isSynced: true
+        )
+    }
+}
+
 struct BackendUser: Codable {
     let id: String
     let appleUserId: String?
@@ -56,7 +86,7 @@ final class BackendClient {
 
     init() {
         let cfg = URLSessionConfiguration.default
-        cfg.timeoutIntervalForRequest = 30
+        cfg.timeoutIntervalForRequest = 60
         session = URLSession(configuration: cfg)
 
         let e = JSONEncoder()
@@ -87,7 +117,9 @@ final class BackendClient {
     }
 
     func signInWithApple(identityToken: String, email: String?, name: String?) async throws -> SessionResponse {
-        try await post("/auth/apple", body: AppleSignInBody(identityToken: identityToken, email: email, name: name))
+        try await withRetry {
+            try await post("/auth/apple", body: AppleSignInBody(identityToken: identityToken, email: email, name: name))
+        }
     }
 
     private struct GoogleSignInBody: Encodable {
@@ -95,11 +127,17 @@ final class BackendClient {
     }
 
     func signInWithGoogle(idToken: String) async throws -> SessionResponse {
-        try await post("/auth/google", body: GoogleSignInBody(idToken: idToken))
+        try await withRetry {
+            try await post("/auth/google", body: GoogleSignInBody(idToken: idToken))
+        }
     }
 
     func me(token: String) async throws -> BackendUser {
         try await get("/me", token: token)
+    }
+
+    func fetchSessions(token: String) async throws -> [RemoteSpinSession] {
+        try await get("/sessions", token: token)
     }
 
     func syncSession(_ spinSession: SpinSession, token: String) async throws {
@@ -129,6 +167,29 @@ final class BackendClient {
     }
 
     // MARK: - Internals
+
+    // Retries on transient network failures and 5xx responses (e.g. Render cold-start wakeup).
+    private func withRetry<T>(maxAttempts: Int = 3, delay: Double = 2.0, operation: () async throws -> T) async throws -> T {
+        var lastError: Error?
+        for attempt in 0..<maxAttempts {
+            if attempt > 0 {
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            }
+            do {
+                return try await operation()
+            } catch let error as URLError {
+                lastError = error
+            } catch let error as BackendError {
+                switch error {
+                case .httpError(let status, _) where status >= 500:
+                    lastError = error
+                default:
+                    throw error
+                }
+            }
+        }
+        throw lastError!
+    }
 
     private func get<R: Decodable>(_ path: String, token: String) async throws -> R {
         var req = URLRequest(url: baseURL.appending(path: path))
