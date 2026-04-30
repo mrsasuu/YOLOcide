@@ -23,6 +23,25 @@ type createRequest struct {
 	Results      []ResultInput `json:"results"`
 }
 
+func (h *Handler) HandleList(w http.ResponseWriter, r *http.Request) {
+	uid, ok := auth.UserIDFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized", "missing session")
+		return
+	}
+
+	sessions, err := h.repo.List(r.Context(), uid)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "list_failed", err.Error())
+		return
+	}
+
+	if sessions == nil {
+		sessions = []SessionOutput{}
+	}
+	writeJSON(w, http.StatusOK, sessions)
+}
+
 func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	uid, ok := auth.UserIDFromContext(r.Context())
 	if !ok {

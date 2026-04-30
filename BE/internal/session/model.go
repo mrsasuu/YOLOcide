@@ -24,3 +24,22 @@ type CreateInput struct {
 	WheelOptions []OptionInput
 	Results      []ResultInput
 }
+
+type OptionOutput struct {
+	Name     string `json:"name"`
+	ColorHex string `json:"colorHex"`
+}
+
+type ResultOutput struct {
+	Name     string `json:"name"`
+	ColorHex string `json:"colorHex"`
+	Rank     int    `json:"rank"`
+}
+
+type SessionOutput struct {
+	ID           uuid.UUID      `json:"id"`
+	SpunAt       time.Time      `json:"spunAt"`
+	IsRanked     bool           `json:"isRanked"`
+	WheelOptions []OptionOutput `json:"wheelOptions"`
+	Results      []ResultOutput `json:"results"`
+}

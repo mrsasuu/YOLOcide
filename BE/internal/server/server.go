@@ -41,6 +41,7 @@ func New(deps Deps) http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(auth.Middleware(deps.Session))
 		r.Get("/me", deps.Auth.HandleMe)
+		r.Get("/sessions", deps.Sessions.HandleList)
 		r.Post("/sessions", deps.Sessions.HandleCreate)
 	})
 
